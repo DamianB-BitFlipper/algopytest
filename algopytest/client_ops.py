@@ -16,20 +16,20 @@ from algosdk.future.transaction import LogicSig, LogicSigTransaction, PaymentTxn
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
-from .plugin_initialization import Inits
+from .config_params import ConfigParams
 from .entities import AlgoUser
 
 ## CLIENTS
 def _algod_client():
     """Instantiate and return Algod client object."""
-    return algod.AlgodClient(Inits.algod_token, 
-                             Inits.algod_address)
+    return algod.AlgodClient(ConfigParams.algod_token, 
+                             ConfigParams.algod_address)
 
 
 def _indexer_client():
     """Instantiate and return Indexer client object."""
-    return indexer.IndexerClient(Inits.indexer_token,
-                                 Inits.indexer_address)
+    return indexer.IndexerClient(ConfigParams.indexer_token,
+                                 ConfigParams.indexer_address)
 
 
 ## SANDBOX
@@ -54,7 +54,7 @@ def _cli_passphrase_for_account(address):
 
 def _sandbox_executable():
     """Return full path to Algorand's sandbox executable."""
-    return Inits.sandbox_dir / "sandbox"
+    return ConfigParams.sandbox_dir / "sandbox"
 
 
 def call_sandbox_command(*args):
@@ -128,7 +128,7 @@ def _wait_for_indexer(func):
     """
     def wrapped(*args, **kwargs):
         timeout = 0
-        while timeout < Inits.indexer_timeout:
+        while timeout < ConfigParams.indexer_timeout:
             try:
                 ret = func(*args, **kwargs)
                 break

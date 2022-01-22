@@ -10,8 +10,8 @@ from .account_ops import (
     add_standalone_account,
 )
 
-from .plugin_initialization import (
-    Inits,
+from .program_store import (
+    ProgramStore,
 )
  
 @pytest.fixture()
@@ -86,10 +86,10 @@ def smart_contract_id(owner):
     # Create the smart contract
     app_id = create_app(
         owner,
-        Inits.approval_compiled,
-        Inits.clear_compiled,
-        Inits.global_schema,
-        Inits.local_schema,
+        ProgramStore.approval_compiled,
+        ProgramStore.clear_compiled,
+        ProgramStore.global_schema,
+        ProgramStore.local_schema,
     )
 
     # This is where the testing happens
