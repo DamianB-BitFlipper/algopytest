@@ -85,7 +85,7 @@ def smart_contract_id(owner):
     """A smart contract instance."""
     # Create the smart contract
     app_id = create_app(
-        owner.private_key,
+        owner,
         Inits.approval_compiled,
         Inits.clear_compiled,
         Inits.global_schema,
@@ -96,4 +96,4 @@ def smart_contract_id(owner):
     yield app_id
 
     # Clean up the smart contract
-    delete_app(owner.private_key, app_id)
+    delete_app(owner, app_id)

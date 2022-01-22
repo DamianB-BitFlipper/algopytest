@@ -164,7 +164,7 @@ def _initial_funds_account():
     private_key = mnemonic.to_private_key(passphrase)
     
     # Return an `AlgoUser` of the initial account
-    return AlgoUser(private_key, initial_address)
+    return AlgoUser(initial_address, private_key)
 
 
 @_wait_for_indexer
