@@ -20,13 +20,7 @@
 # OR OTHER DEALINGS IN THE SOFTWARE.
 
 __version__ = "0.1.0"
-__author__ = 'Damian Barabonkov'
+__author__ = "Damian Barabonkov"
 
-from .program_store import (
-    initialize
-)
-
-from .client_ops import (
-    application_global_state
-)
-
+from .client_ops import application_global_state
+from .program_store import initialize

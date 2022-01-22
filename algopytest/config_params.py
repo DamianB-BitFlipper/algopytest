@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 # Namespace the global variables
 class _ConfigParams:
     # Default client specific parameters
@@ -10,7 +11,7 @@ class _ConfigParams:
     indexer_token = ""
 
     # Assume that the sandbox is the sibling directory of this project
-    sandbox_dir = Path('.').resolve().parent / "sandbox"
+    sandbox_dir = Path(".").resolve().parent / "sandbox"
 
     # Timeout to use when querying the indexer, in seconds
     indexer_timeout = 61
@@ -31,5 +32,6 @@ class _ConfigParams:
         env_indexer_timeout = os.environ.get("INDEXER_TIMEOUT")
         if env_indexer_timeout is not None:
             self.indexer_timeout = int(env_indexer_timeout)
+
 
 ConfigParams = _ConfigParams()

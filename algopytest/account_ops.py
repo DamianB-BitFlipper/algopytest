@@ -1,8 +1,9 @@
 import algosdk
 
 from .client_ops import _initial_funds_account
-from .transaction_ops import payment_transaction
 from .entities import AlgoUser
+from .transaction_ops import payment_transaction
+
 
 ## CREATING
 def add_standalone_account(funded=True):
@@ -14,6 +15,7 @@ def add_standalone_account(funded=True):
         fund_account(account)
 
     return account
+
 
 def fund_account(receiving_account, initial_funds=1_000_000_000):
     """Fund the `receiving_account` with `initial_funds` amount of microAlgos."""
@@ -27,6 +29,7 @@ def fund_account(receiving_account, initial_funds=1_000_000_000):
         initial_funds,
         note="Initial funds",
     )
+
 
 def defund_account(defunding_account):
     """Return the entire balance of `defunding_account` back to the `initial_account`."""

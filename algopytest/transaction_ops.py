@@ -1,18 +1,16 @@
-from algosdk.future import transaction
 from algosdk import account
+from algosdk.future import transaction
 
-from .client_ops import (
-    suggested_params,
-    process_transactions,
-    pending_transaction_info,
-)
-
+from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import NullUser
+
 
 def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn=None):
     """A decorator to handle all of the transaction boilerplate."""
+
     def decorator(func):
         """The actual decorator since it takes the arguments above."""
+
         def wrapped(*args, **kwargs):
             print(f"Running {func.__name__}")
 
@@ -25,7 +23,7 @@ def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn
             params.fee = 1000
 
             # Augment the `kwargs` with the suggested `params`
-            kwargs['_params'] = params
+            kwargs["_params"] = params
 
             # Create unsigned transaction
             txn = func(*args, **kwargs)
@@ -40,10 +38,12 @@ def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn
             transaction_response = pending_transaction_info(tx_id)
 
             if format_finish is not None:
-                print(f"Finished {func.__name__} with: ", 
-                      format_finish(transaction_response))
+                print(
+                    f"Finished {func.__name__} with: ",
+                    format_finish(transaction_response),
+                )
             else:
-                print(f"Finished {func.__name__}") 
+                print(f"Finished {func.__name__}")
 
             if return_fn is not None:
                 return return_fn(transaction_response)
@@ -51,7 +51,9 @@ def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn
                 return None
 
         return wrapped
+
     return decorator
+
 
 # Create new application
 @transaction_boilerplate(
@@ -59,18 +61,25 @@ def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn
     format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
     return_fn=lambda txinfo: txinfo["application-index"],
 )
-def create_app(owner, approval_program, clear_program, 
-               global_schema, local_schema, _params): 
+def create_app(
+    owner, approval_program, clear_program, global_schema, local_schema, _params
+):
     # Declare on_complete as NoOp
-    on_complete = transaction.OnComplete.NoOpOC.real           
+    on_complete = transaction.OnComplete.NoOpOC.real
 
     # Create unsigned transaction
     txn = transaction.ApplicationCreateTxn(
-        owner.address, _params, on_complete, \
-        approval_program, clear_program, \
-        global_schema, local_schema)
+        owner.address,
+        _params,
+        on_complete,
+        approval_program,
+        clear_program,
+        global_schema,
+        local_schema,
+    )
 
     return txn
+
 
 # Delete application
 @transaction_boilerplate(
@@ -80,40 +89,43 @@ def create_app(owner, approval_program, clear_program,
 def delete_app(owner, app_id, _params):
     return transaction.ApplicationDeleteTxn(owner.address, _params, app_id)
 
+
 # Update existing application
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def update_app(owner, app_id, approval_program, clear_program,
-               _sender, _params): 
+def update_app(owner, app_id, approval_program, clear_program, _sender, _params):
     return transaction.ApplicationUpdateTxn(
-        owner.address, _params, app_id, \
-        approval_program, clear_program
+        owner.address, _params, app_id, approval_program, clear_program
     )
+
 
 # Opt-in to application
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def opt_in_app(sender, app_id, _params): 
+def opt_in_app(sender, app_id, _params):
     return transaction.ApplicationOptInTxn(sender.address, _params, app_id)
+
 
 # Close out from application
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def close_out_app(sender, app_id, _params): 
+def close_out_app(sender, app_id, _params):
     return transaction.ApplicationCloseOutTxn(sender.address, _params, app_id)
+
 
 # Send a payment transaction
 @transaction_boilerplate(
     sender_account_argidx=0,
 )
-def payment_transaction(sender, receiver, amount, _params, 
-                        note="", close_remainder_to=NullUser):
+def payment_transaction(
+    sender, receiver, amount, _params, note="", close_remainder_to=NullUser
+):
     return transaction.PaymentTxn(
         sender.address,
         _params,

@@ -9,8 +9,8 @@ import pty
 import subprocess
 import time
 
-from algosdk.encoding import encode_address
 from algosdk import mnemonic
+from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
 from algosdk.future.transaction import LogicSig, LogicSigTransaction, PaymentTxn
 from algosdk.v2client import algod, indexer
@@ -19,17 +19,18 @@ from pyteal import Mode, compileTeal
 from .config_params import ConfigParams
 from .entities import AlgoUser
 
+
 ## CLIENTS
 def _algod_client():
     """Instantiate and return Algod client object."""
-    return algod.AlgodClient(ConfigParams.algod_token, 
-                             ConfigParams.algod_address)
+    return algod.AlgodClient(ConfigParams.algod_token, ConfigParams.algod_address)
 
 
 def _indexer_client():
     """Instantiate and return Indexer client object."""
-    return indexer.IndexerClient(ConfigParams.indexer_token,
-                                 ConfigParams.indexer_address)
+    return indexer.IndexerClient(
+        ConfigParams.indexer_token, ConfigParams.indexer_address
+    )
 
 
 ## SANDBOX
@@ -94,6 +95,7 @@ def _wait_for_confirmation(client, transaction_id, timeout):
         "pending tx not found in timeout rounds, timeout value = : {}".format(timeout)
     )
 
+
 def process_logic_sig_transaction(logic_sig, payment_transaction):
     """Create logic signature transaction and send it to the network."""
     client = _algod_client()
@@ -121,28 +123,29 @@ def pending_transaction_info(transaction_id):
     client = _algod_client()
     return client.pending_transaction_info(transaction_id)
 
+
 ## INDEXER RETRIEVAL
 def _wait_for_indexer(func):
-    """A decorator function to automatically wait for indexer timeout 
+    """A decorator function to automatically wait for indexer timeout
     when running `func`.
     """
+
     def wrapped(*args, **kwargs):
         timeout = 0
         while timeout < ConfigParams.indexer_timeout:
             try:
                 ret = func(*args, **kwargs)
                 break
-            except IndexerHTTPError as e:
+            except IndexerHTTPError:
                 time.sleep(1)
                 timeout += 1
         else:
-            raise TimeoutError(
-                "Timeout reached waiting for indexer."
-            )
+            raise TimeoutError("Timeout reached waiting for indexer.")
 
         return ret
 
     return wrapped
+
 
 @_wait_for_indexer
 def _initial_funds_account():
@@ -162,7 +165,7 @@ def _initial_funds_account():
     )
     passphrase = _cli_passphrase_for_account(initial_address)
     private_key = mnemonic.to_private_key(passphrase)
-    
+
     # Return an `AlgoUser` of the initial account
     return AlgoUser(initial_address, private_key)
 
@@ -171,6 +174,7 @@ def _initial_funds_account():
 def transaction_info(transaction_id):
     """Return transaction with provided id."""
     return _indexer_client().transaction(transaction_id)
+
 
 @_wait_for_indexer
 def application_global_state(app_id, addresses=[]):
@@ -181,14 +185,15 @@ def application_global_state(app_id, addresses=[]):
     encoded to get their human-readable forms.
     """
     app = _indexer_client().applications(app_id)
-    app_global_state = app['application']['params']['global-state']
+    app_global_state = app["application"]["params"]["global-state"]
     return _convert_algo_dict(app_global_state, addresses)
+
 
 @_wait_for_indexer
 def account_balance(address):
     """Return the balance amount for the provided `address`."""
-    account = _indexer_client().account_info(address)['account']
-    return account['amount']
+    account = _indexer_client().account_info(address)["account"]
+    return account["amount"]
 
 
 ## UTILITY
@@ -197,34 +202,37 @@ def _compile_source(source):
     compile_response = _algod_client().compile(source)
     return base64.b64decode(compile_response["result"])
 
+
 def compile_program(program, mode=Mode.Application, version=5):
     """Compiles a PyTEAL smart contract program to the teal binary code."""
     source = compileTeal(program(), mode=mode, version=version)
     return _compile_source(source)
+
 
 def logic_signature(teal_source):
     """Create and return logic signature for provided `teal_source`."""
     compiled_binary = _compile_source(teal_source)
     return LogicSig(compiled_binary)
 
+
 def _convert_algo_dict(algo_dict, addresses):
     """Converts an Algorand dictionary to a Python one."""
     ret = {}
     for entry in algo_dict:
-        key = base64.b64decode(entry['key'])
+        key = base64.b64decode(entry["key"])
 
-        value_type = entry['value']['type']
+        value_type = entry["value"]["type"]
 
-        if value_type == 0: # Integer
-            value = entry['value']['uint']
-        elif value_type == 1: # Bytes
-            value = base64.b64decode(entry['value']['bytes'])
+        if value_type == 0:  # Integer
+            value = entry["value"]["uint"]
+        elif value_type == 1:  # Bytes
+            value = base64.b64decode(entry["value"]["bytes"])
         else:
-            raise ValueError(f'Unknown value type for key: {key}')
+            raise ValueError(f"Unknown value type for key: {key}")
 
         ret[key] = value
 
-    # Encode the `addresses` supplied to get 
+    # Encode the `addresses` supplied to get
     # their human-readable forms
     for address in addresses:
         ret[address] = encode_address(ret[address])
