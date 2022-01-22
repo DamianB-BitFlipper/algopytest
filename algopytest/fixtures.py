@@ -5,7 +5,7 @@ from .transaction_ops import (
     delete_app,
 )
 
-from .helpers import (
+from .account_ops import (
     defund_account,
     add_standalone_account,
 )
@@ -16,53 +16,53 @@ from .plugin_initialization import (
  
 @pytest.fixture()
 def owner():
-    """Create an owner account."""
+    """An owner account."""
     owner = add_standalone_account()
     
     yield owner
 
     # Clean up
-    defund_account(owner.private_key)
+    defund_account(owner)
 
 @pytest.fixture()
 def user1():
-    """Create a user account."""
+    """A user account."""
     user = add_standalone_account()
     
     yield user
 
     # Clean up
-    defund_account(user.private_key)
+    defund_account(user)
 
 @pytest.fixture()
 def user2():
-    """Create a second user account."""
+    """A second user account."""
     user = add_standalone_account()
     
     yield user
 
     # Clean up
-    defund_account(user.private_key)
+    defund_account(user)
 
 @pytest.fixture()
 def user3():
-    """Create a third user account."""
+    """A third user account."""
     user = add_standalone_account()
     
     yield user
 
     # Clean up
-    defund_account(user.private_key)
+    defund_account(user)
 
 @pytest.fixture()
 def user4():
-    """Create a fourth user account."""
+    """A fourth user account."""
     user = add_standalone_account()
     
     yield user
 
     # Clean up
-    defund_account(user.private_key)
+    defund_account(user)
 
 @pytest.fixture()
 def create_user():
@@ -78,11 +78,11 @@ def create_user():
 
     # Clean up by de-funding all of the `created_users`
     for user in created_users:
-        defund_account(user.private_key)
+        defund_account(user)
 
 @pytest.fixture()
 def smart_contract_id(owner):
-    """Create, yield and clean up the smart contract."""
+    """A smart contract instance."""
     # Create the smart contract
     app_id = create_app(
         owner.private_key,

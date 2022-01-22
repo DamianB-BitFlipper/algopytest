@@ -1,7 +1,7 @@
 from algosdk.future import transaction
 from algosdk import account
 
-from .helpers import (
+from .client_ops import (
     suggested_params,
     process_transactions,
     pending_transaction_info,
@@ -15,10 +15,10 @@ def transaction_boilerplate(private_key_argidx, format_finish=None, return_fn=No
             print(f"Running {func.__name__}")
 
             # Extract the private key from the function arguments
-            private_key = args[private_key_argidx]
+            sender_private_key = args[private_key_argidx]
 
             # Define sender as creator
-            sender = account.address_from_private_key(private_key)
+            sender = account.address_from_private_key(sender_private_key)
 
             # Get node suggested parameters
             params = suggested_params()
@@ -33,7 +33,7 @@ def transaction_boilerplate(private_key_argidx, format_finish=None, return_fn=No
             txn = func(*args, **kwargs)
 
             # Sign transaction
-            signed_txn = txn.sign(private_key)
+            signed_txn = txn.sign(sender_private_key)
 
             # Send the transaction and await for confirmation
             tx_id = process_transactions([signed_txn])
@@ -90,7 +90,7 @@ def delete_app(owner_private_key, app_id,
     private_key_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def update_app(private_key, app_id, 
+def update_app(owner_private_key, app_id, 
                approval_program, clear_program,
                _sender, _params): 
     return transaction.ApplicationUpdateTxn(
@@ -103,7 +103,7 @@ def update_app(private_key, app_id,
     private_key_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def opt_in_app(private_key, app_id,
+def opt_in_app(sender_private_key, app_id,
                _sender, _params): 
     return transaction.ApplicationOptInTxn(_sender, _params, app_id)
 
@@ -112,6 +112,21 @@ def opt_in_app(private_key, app_id,
     private_key_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def close_out_app(private_key, app_id,
+def close_out_app(sender_private_key, app_id,
                   _sender, _params): 
     return transaction.ApplicationCloseOutTxn(_sender, _params, app_id)
+
+# Send a payment transaction
+@transaction_boilerplate(
+    private_key_argidx=0,
+)
+def payment_transaction(sender_private_key, receiver, amount,
+                        _sender, _params, note="", close_remainder_to=""):
+    return transaction.PaymentTxn(
+        _sender, 
+        _params,
+        receiver,
+        amount,
+        note=note.encode(),
+        close_remainder_to=close_remainder_to,
+    )

@@ -22,5 +22,11 @@
 __version__ = "0.1.0"
 __author__ = 'Damian Barabonkov'
 
-from .plugin_initialization import initialize
+from .plugin_initialization import (
+    initialize,
+)
+
+from .client_ops import (
+    application_global_state
+)
 

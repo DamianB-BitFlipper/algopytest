@@ -9,7 +9,8 @@ import pty
 import subprocess
 import time
 
-from algosdk import account, mnemonic
+from algosdk.encoding import encode_address
+from algosdk import mnemonic
 from algosdk.error import IndexerHTTPError
 from algosdk.future.transaction import LogicSig, LogicSigTransaction, PaymentTxn
 from algosdk.v2client import algod, indexer
@@ -21,14 +22,14 @@ from .entities import AlgoUser
 ## CLIENTS
 def _algod_client():
     """Instantiate and return Algod client object."""
-    return algod.AlgodClient(Inits.algod_address,
-                             Inits.algod_token)
+    return algod.AlgodClient(Inits.algod_token, 
+                             Inits.algod_address)
 
 
 def _indexer_client():
     """Instantiate and return Indexer client object."""
-    return indexer.IndexerClient(Inits.indexer_address,
-                                 Inits.indexer_token)
+    return indexer.IndexerClient(Inits.indexer_token,
+                                 Inits.indexer_address)
 
 
 ## SANDBOX
@@ -51,25 +52,9 @@ def _cli_passphrase_for_account(address):
     return passphrase
 
 
-def _cli_balance_of_account(address):
-    """Return the balance amount for the provided `address`."""
-    process = call_sandbox_command("goal", "account", "balance", "-a", address)
-
-    if process.stderr:
-        raise RuntimeError(process.stderr.decode("utf8"))
-
-    parts = process.stdout.decode("utf8").split()
-    if len(parts) > 1:
-        return int(parts[0])
-    else:
-        raise ValueError(
-            "Can't retrieve balance from the address: %s\noutput: %s"
-            % (address, process.stdout.decode("utf8"))
-        )
-
 def _sandbox_executable():
     """Return full path to Algorand's sandbox executable."""
-    return Inits.sandbox_dir + "/sandbox"
+    return Inits.sandbox_dir / "sandbox"
 
 
 def call_sandbox_command(*args):
@@ -80,37 +65,6 @@ def call_sandbox_command(*args):
 
 
 ## TRANSACTIONS
-def _add_transaction(sender, receiver, amount, priv_key=None, passphrase=None, note="", close_remainder_to=""):
-    """Create and sign transaction from provided arguments.
-
-    Returned non-empty tuple carries field where error was raised and description.
-    If the first item is None then the error is non-field/integration error.
-    Returned two-tuple of empty strings marks successful transaction.
-    """
-    client = _algod_client()
-    params = client.suggested_params()
-    unsigned_txn = PaymentTxn(
-        sender,
-        params,
-        receiver,
-        amount,
-        note=note.encode(), 
-        close_remainder_to=close_remainder_to,
-    )
-    
-    if priv_key is not None:
-        private_key = priv_key
-    elif passphrase is not None:
-        private_key = mnemonic.to_private_key(passphrase)
-    else:
-        raise ValueError("A private key or passphrase must be passed in.")
-
-    signed_txn = unsigned_txn.sign(private_key)
-    transaction_id = client.send_transaction(signed_txn)
-    _wait_for_confirmation(client, transaction_id, 4)
-    return transaction_id
-
-
 def _wait_for_confirmation(client, transaction_id, timeout):
     """
     Wait until the transaction is confirmed or rejected, or until 'timeout'
@@ -140,12 +94,6 @@ def _wait_for_confirmation(client, transaction_id, timeout):
         "pending tx not found in timeout rounds, timeout value = : {}".format(timeout)
     )
 
-
-def create_payment_transaction(escrow_address, params, receiver, amount):
-    """Create and return payment transaction from provided arguments."""
-    return PaymentTxn(escrow_address, params, receiver, amount)
-
-
 def process_logic_sig_transaction(logic_sig, payment_transaction):
     """Create logic signature transaction and send it to the network."""
     client = _algod_client()
@@ -173,71 +121,7 @@ def pending_transaction_info(transaction_id):
     client = _algod_client()
     return client.pending_transaction_info(transaction_id)
 
-## CREATING
-def add_standalone_account(funded=True):
-    """Create standalone account and return two-tuple of its private key and address."""
-    private_key, address = account.generate_account()
-
-    if funded:
-        fund_account(address)
-
-    return AlgoUser(private_key, address)
-
-
-def fund_account(address, initial_funds=1_000_000_000):
-    """Fund provided `address` with `initial_funds` amount of microAlgos."""
-    initial_funds_address = _initial_funds_address()
-    if initial_funds_address is None:
-        raise Exception("Initial funds weren't transferred!")
-    _add_transaction(
-        initial_funds_address,
-        address,
-        initial_funds,
-        passphrase=_cli_passphrase_for_account(initial_funds_address),
-        note="Initial funds",
-    )
-
-
-def defund_account(sender_priv):
-    """Return the entire balance of `sender_priv` back to the `initial_fund_address`."""
-    initial_funds_address = _initial_funds_address()
-    if initial_funds_address is None:
-        raise Exception("Initial funds weren't transferred!")
-
-    sender_addr = account.address_from_private_key(sender_priv)
-    _add_transaction(
-        sender_addr,
-        initial_funds_address,
-        0,
-        priv_key=sender_priv,
-        note="Returning funds",
-        close_remainder_to=initial_funds_address,
-    )
-
-
-## RETRIEVING
-def _initial_funds_address():
-    """Get the address of initially created account having enough funds.
-
-    Such an account is used to transfer initial funds for the accounts
-    created in this tutorial.
-    """
-    return next(
-        (
-            account.get("address")
-            for account in _indexer_client().accounts().get("accounts", [{}, {}])
-            if account.get("created-at-round") == 0
-            and account.get("status") == "Online"  # "Online" for devMode
-        ),
-        None,
-    )
-
-
-def account_balance(address):
-    """Return funds balance of the account having provided address."""
-    account_info = _algod_client().account_info(address)
-    return account_info.get("amount")
-
+## INDEXER RETRIEVAL
 def _wait_for_indexer(func):
     """A decorator function to automatically wait for indexer timeout 
     when running `func`.
@@ -248,7 +132,7 @@ def _wait_for_indexer(func):
             try:
                 ret = func(*args, **kwargs)
                 break
-            except IndexerHTTPError:
+            except IndexerHTTPError as e:
                 time.sleep(1)
                 timeout += 1
         else:
@@ -261,39 +145,51 @@ def _wait_for_indexer(func):
     return wrapped
 
 @_wait_for_indexer
+def _initial_funds_account():
+    """Get the account initially created by the sandbox.
+
+    Such an account is used to transfer initial funds for the accounts
+    created by this pytest plugin.
+    """
+    initial_address = next(
+        (
+            account.get("address")
+            for account in _indexer_client().accounts().get("accounts", [{}, {}])
+            if account.get("created-at-round") == 0
+            and account.get("status") == "Online"  # "Online" for devMode
+        ),
+        None,
+    )
+    passphrase = _cli_passphrase_for_account(initial_address)
+    private_key = mnemonic.to_private_key(passphrase)
+    
+    # Return an `AlgoUser` of the initial account
+    return AlgoUser(private_key, initial_address)
+
+
+@_wait_for_indexer
 def transaction_info(transaction_id):
     """Return transaction with provided id."""
     return _indexer_client().transaction(transaction_id)
 
-def _convert_algo_dict(algo_dict):
-    """Converts an Algorand dictionary to a Python one."""
-    ret = {}
-    for entry in algo_dict:
-        key = base64.b64decode(entry['key'])
-
-        value_type = entry['value']['type']
-
-        if value_type == 0: # Integer
-            value = entry['value']['uint']
-        elif value_type == 1: # Bytes
-            value = base64.b64decode(entry['value']['bytes'])
-        else:
-            raise ValueError(f'Unknown value type for key: {key}')
-
-        ret[key] = value
-
-    return ret
-
 @_wait_for_indexer
-def application_global_state(app_id):
+def application_global_state(app_id, addresses=[]):
     """Read the global state of an application.
 
-    If `address` is supplied, then read the local state of that
-    account for the respective application.
+    The `addresses` are the keys where the value is expected
+    to be an Algorand address. Address values need to be
+    encoded to get their human-readable forms.
     """
     app = _indexer_client().applications(app_id)
     app_global_state = app['application']['params']['global-state']
-    return _convert_algo_dict(app_global_state)
+    return _convert_algo_dict(app_global_state, addresses)
+
+@_wait_for_indexer
+def account_balance(address):
+    """Return the balance amount for the provided `address`."""
+    account = _indexer_client().account_info(address)['account']
+    return account['amount']
+
 
 ## UTILITY
 def _compile_source(source):
@@ -310,3 +206,27 @@ def logic_signature(teal_source):
     """Create and return logic signature for provided `teal_source`."""
     compiled_binary = _compile_source(teal_source)
     return LogicSig(compiled_binary)
+
+def _convert_algo_dict(algo_dict, addresses):
+    """Converts an Algorand dictionary to a Python one."""
+    ret = {}
+    for entry in algo_dict:
+        key = base64.b64decode(entry['key'])
+
+        value_type = entry['value']['type']
+
+        if value_type == 0: # Integer
+            value = entry['value']['uint']
+        elif value_type == 1: # Bytes
+            value = base64.b64decode(entry['value']['bytes'])
+        else:
+            raise ValueError(f'Unknown value type for key: {key}')
+
+        ret[key] = value
+
+    # Encode the `addresses` supplied to get 
+    # their human-readable forms
+    for address in addresses:
+        ret[address] = encode_address(ret[address])
+
+    return ret
