@@ -6,7 +6,7 @@ from .transaction_ops import payment_transaction
 
 
 ## CREATING
-def add_standalone_account(funded=True):
+def add_standalone_account(funded: bool = True) -> AlgoUser:
     """Create standalone account and return two-tuple of its private key and address."""
     private_key, address = algosdk.account.generate_account()
     account = AlgoUser(address, private_key)
@@ -17,7 +17,7 @@ def add_standalone_account(funded=True):
     return account
 
 
-def fund_account(receiving_account, initial_funds=1_000_000_000):
+def fund_account(receiving_account: AlgoUser, initial_funds: int = 1_000_000_000):
     """Fund the `receiving_account` with `initial_funds` amount of microAlgos."""
     initial_account = _initial_funds_account()
     if initial_account is None:

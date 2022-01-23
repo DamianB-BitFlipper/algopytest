@@ -8,25 +8,29 @@ import base64
 import pty
 import subprocess
 import time
+from pathlib import Path
+from typing import Any, Callable
 
 from algosdk import mnemonic
 from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
+from algosdk.future import transaction
 from algosdk.future.transaction import LogicSig, LogicSigTransaction, PaymentTxn
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
+from .type_stubs import PyTEAL
 
 
 ## CLIENTS
-def _algod_client():
+def _algod_client() -> algod.AlgodClient:
     """Instantiate and return Algod client object."""
     return algod.AlgodClient(ConfigParams.algod_token, ConfigParams.algod_address)
 
 
-def _indexer_client():
+def _indexer_client() -> indexer.IndexerClient:
     """Instantiate and return Indexer client object."""
     return indexer.IndexerClient(
         ConfigParams.indexer_token, ConfigParams.indexer_address
@@ -34,7 +38,7 @@ def _indexer_client():
 
 
 ## SANDBOX
-def _cli_passphrase_for_account(address):
+def _cli_passphrase_for_account(address: str) -> str:
     """Return passphrase for provided `address`."""
     process = call_sandbox_command("goal", "account", "export", "-a", address)
 
@@ -53,12 +57,12 @@ def _cli_passphrase_for_account(address):
     return passphrase
 
 
-def _sandbox_executable():
+def _sandbox_executable() -> Path:
     """Return full path to Algorand's sandbox executable."""
     return ConfigParams.sandbox_dir / "sandbox"
 
 
-def call_sandbox_command(*args):
+def call_sandbox_command(*args: str) -> subprocess.CompletedProcess:
     """Call and return sandbox command composed from provided arguments."""
     return subprocess.run(
         [_sandbox_executable(), *args], stdin=pty.openpty()[1], capture_output=True
@@ -66,7 +70,7 @@ def call_sandbox_command(*args):
 
 
 ## TRANSACTIONS
-def _wait_for_confirmation(client, transaction_id, timeout):
+def _wait_for_confirmation(client: Any, transaction_id: Any, timeout: Any) -> Any:
     """
     Wait until the transaction is confirmed or rejected, or until 'timeout'
     number of rounds have passed.
@@ -77,6 +81,7 @@ def _wait_for_confirmation(client, transaction_id, timeout):
         dict: pending transaction information, or throws an error if the transaction
             is not confirmed or rejected in the next timeout rounds
     """
+    # TODO: replace me with py-algo-sdk wait for confirm function
     start_round = client.status()["last-round"] + 1
     current_round = start_round
 
@@ -96,8 +101,10 @@ def _wait_for_confirmation(client, transaction_id, timeout):
     )
 
 
-def process_logic_sig_transaction(logic_sig, payment_transaction):
+def process_logic_sig_transaction(logic_sig: Any, payment_transaction: Any) -> Any:
     """Create logic signature transaction and send it to the network."""
+    # TODO: Typing and general behavior
+
     client = _algod_client()
     logic_sig_transaction = LogicSigTransaction(payment_transaction, logic_sig)
     transaction_id = client.send_transaction(logic_sig_transaction)
@@ -105,7 +112,7 @@ def process_logic_sig_transaction(logic_sig, payment_transaction):
     return transaction_id
 
 
-def process_transactions(transactions):
+def process_transactions(transactions: list[transaction.Transaction]) -> int:
     """Send provided grouped `transactions` to network and wait for confirmation."""
     client = _algod_client()
     transaction_id = client.send_transactions(transactions)
@@ -113,24 +120,24 @@ def process_transactions(transactions):
     return transaction_id
 
 
-def suggested_params():
+def suggested_params() -> transaction.SuggestedParams:
     """Return the suggested params from the algod client."""
     return _algod_client().suggested_params()
 
 
-def pending_transaction_info(transaction_id):
+def pending_transaction_info(transaction_id: int) -> dict[str, Any]:
     """Return info on the pending transaction status."""
     client = _algod_client()
     return client.pending_transaction_info(transaction_id)
 
 
 ## INDEXER RETRIEVAL
-def _wait_for_indexer(func):
+def _wait_for_indexer(func: Callable) -> Callable:
     """A decorator function to automatically wait for indexer timeout
     when running `func`.
     """
 
-    def wrapped(*args, **kwargs):
+    def wrapped(*args: Any, **kwargs: Any) -> Any:
         timeout = 0
         while timeout < ConfigParams.indexer_timeout:
             try:
@@ -148,7 +155,7 @@ def _wait_for_indexer(func):
 
 
 @_wait_for_indexer
-def _initial_funds_account():
+def _initial_funds_account() -> AlgoUser:
     """Get the account initially created by the sandbox.
 
     Such an account is used to transfer initial funds for the accounts
@@ -163,6 +170,10 @@ def _initial_funds_account():
         ),
         None,
     )
+
+    if initial_address is None:
+        raise ValueError("Initial funds account not yet created!")
+
     passphrase = _cli_passphrase_for_account(initial_address)
     private_key = mnemonic.to_private_key(passphrase)
 
@@ -171,13 +182,13 @@ def _initial_funds_account():
 
 
 @_wait_for_indexer
-def transaction_info(transaction_id):
+def transaction_info(transaction_id: int) -> dict[str, Any]:
     """Return transaction with provided id."""
     return _indexer_client().transaction(transaction_id)
 
 
 @_wait_for_indexer
-def application_global_state(app_id, addresses=[]):
+def application_global_state(app_id: int, addresses: list[str] = []) -> dict[str, str]:
     """Read the global state of an application.
 
     The `addresses` are the keys where the value is expected
@@ -190,51 +201,60 @@ def application_global_state(app_id, addresses=[]):
 
 
 @_wait_for_indexer
-def account_balance(address):
+def account_balance(address: str) -> int:
     """Return the balance amount for the provided `address`."""
     account = _indexer_client().account_info(address)["account"]
     return account["amount"]
 
 
 ## UTILITY
-def _compile_source(source):
+def _compile_source(source: str) -> bytes:
     """Compile and return teal binary code."""
     compile_response = _algod_client().compile(source)
     return base64.b64decode(compile_response["result"])
 
 
-def compile_program(program, mode=Mode.Application, version=5):
+def compile_program(
+    program: PyTEAL, mode: Mode = Mode.Application, version: int = 5
+) -> bytes:
     """Compiles a PyTEAL smart contract program to the teal binary code."""
     source = compileTeal(program(), mode=mode, version=version)
     return _compile_source(source)
 
 
-def logic_signature(teal_source):
+def logic_signature(teal_source: Any) -> Any:
     """Create and return logic signature for provided `teal_source`."""
+    # TODO: Typing and general behavior
     compiled_binary = _compile_source(teal_source)
     return LogicSig(compiled_binary)
 
 
-def _convert_algo_dict(algo_dict, addresses):
+def _base64_to_str(b64: str) -> str:
+    """Converts a b64 encoded string to a normal UTF-8 string."""
+    # Decode the base64 to bytes and then decode them as a UTF-8 string
+    byte_decoding = base64.b64decode(b64)
+    return byte_decoding.decode("utf-8")
+
+
+def _convert_algo_dict(
+    algo_dict: list[dict[str, Any]], addresses: list[str]
+) -> dict[str, str]:
     """Converts an Algorand dictionary to a Python one."""
     ret = {}
     for entry in algo_dict:
-        key = base64.b64decode(entry["key"])
+        key = _base64_to_str(entry["key"])
 
         value_type = entry["value"]["type"]
 
         if value_type == 0:  # Integer
             value = entry["value"]["uint"]
-        elif value_type == 1:  # Bytes
-            value = base64.b64decode(entry["value"]["bytes"])
+        elif value_type == 1 and key not in addresses:  # Bytes non-address
+            value = _base64_to_str(entry["value"]["bytes"])
+        elif value_type == 1 and key in addresses:  # Bytes address
+            value = encode_address(base64.b64decode(entry["value"]["bytes"]))
         else:
             raise ValueError(f"Unknown value type for key: {key}")
 
         ret[key] = value
-
-    # Encode the `addresses` supplied to get
-    # their human-readable forms
-    for address in addresses:
-        ret[address] = encode_address(ret[address])
 
     return ret

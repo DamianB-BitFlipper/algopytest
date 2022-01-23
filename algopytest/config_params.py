@@ -16,7 +16,7 @@ class _ConfigParams:
     # Timeout to use when querying the indexer, in seconds
     indexer_timeout = 61
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Overwrite any of the parameters if environment variables are set
         self.algod_address = os.environ.get("ALGOD_ADDRESS") or self.algod_address
         self.algod_token = os.environ.get("ALGOD_TOKEN") or self.algod_token
