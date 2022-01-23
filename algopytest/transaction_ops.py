@@ -1,17 +1,24 @@
+from typing import Any, Callable, Optional
+
 from algosdk import account
 from algosdk.future import transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
-from .entities import NullUser
+from .entities import AlgoUser, NullUser
+from .type_stubs import PyTEAL
 
 
-def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn=None):
+def transaction_boilerplate(
+    sender_account_argidx: int,
+    format_finish: Optional[Callable] = None,
+    return_fn: Optional[Callable] = None,
+) -> Callable:
     """A decorator to handle all of the transaction boilerplate."""
 
-    def decorator(func):
+    def decorator(func: Callable) -> Callable:
         """The actual decorator since it takes the arguments above."""
 
-        def wrapped(*args, **kwargs):
+        def wrapped(*args: Any, **kwargs: Any) -> Any:
             print(f"Running {func.__name__}")
 
             # Extract the account from the function arguments
@@ -62,8 +69,13 @@ def transaction_boilerplate(sender_account_argidx, format_finish=None, return_fn
     return_fn=lambda txinfo: txinfo["application-index"],
 )
 def create_app(
-    owner, approval_program, clear_program, global_schema, local_schema, _params
-):
+    owner: AlgoUser,
+    approval_program: PyTEAL,
+    clear_program: PyTEAL,
+    global_schema: transaction.StateSchema,
+    local_schema: transaction.StateSchema,
+    _params: transaction.SuggestedParams,
+) -> transaction.Transaction:
     # Declare on_complete as NoOp
     on_complete = transaction.OnComplete.NoOpOC.real
 
@@ -86,7 +98,9 @@ def create_app(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def delete_app(owner, app_id, _params):
+def delete_app(
+    owner: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+) -> transaction.Transaction:
     return transaction.ApplicationDeleteTxn(owner.address, _params, app_id)
 
 
@@ -95,7 +109,13 @@ def delete_app(owner, app_id, _params):
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def update_app(owner, app_id, approval_program, clear_program, _sender, _params):
+def update_app(
+    owner: AlgoUser,
+    app_id: int,
+    approval_program: PyTEAL,
+    clear_program: PyTEAL,
+    _params: transaction.SuggestedParams,
+) -> transaction.Transaction:
     return transaction.ApplicationUpdateTxn(
         owner.address, _params, app_id, approval_program, clear_program
     )
@@ -106,7 +126,9 @@ def update_app(owner, app_id, approval_program, clear_program, _sender, _params)
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def opt_in_app(sender, app_id, _params):
+def opt_in_app(
+    sender: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+) -> transaction.Transaction:
     return transaction.ApplicationOptInTxn(sender.address, _params, app_id)
 
 
@@ -115,7 +137,9 @@ def opt_in_app(sender, app_id, _params):
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
-def close_out_app(sender, app_id, _params):
+def close_out_app(
+    sender: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+) -> transaction.Transaction:
     return transaction.ApplicationCloseOutTxn(sender.address, _params, app_id)
 
 
@@ -124,8 +148,13 @@ def close_out_app(sender, app_id, _params):
     sender_account_argidx=0,
 )
 def payment_transaction(
-    sender, receiver, amount, _params, note="", close_remainder_to=NullUser
-):
+    sender: AlgoUser,
+    receiver: AlgoUser,
+    amount: int,
+    _params: transaction.SuggestedParams,
+    note: str = "",
+    close_remainder_to: AlgoUser = NullUser,
+) -> transaction.Transaction:
     return transaction.PaymentTxn(
         sender.address,
         _params,

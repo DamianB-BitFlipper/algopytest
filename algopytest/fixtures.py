@@ -1,12 +1,16 @@
+from typing import Callable, Generator
+
 import pytest
 
 from .account_ops import add_standalone_account, defund_account
+from .entities import AlgoUser
 from .program_store import ProgramStore
 from .transaction_ops import create_app, delete_app
+from .type_stubs import YieldFixture
 
 
 @pytest.fixture()
-def owner():
+def owner() -> YieldFixture[AlgoUser]:
     """An owner account."""
     owner = add_standalone_account()
 
@@ -17,7 +21,7 @@ def owner():
 
 
 @pytest.fixture()
-def user1():
+def user1() -> YieldFixture[AlgoUser]:
     """A user account."""
     user = add_standalone_account()
 
@@ -28,7 +32,7 @@ def user1():
 
 
 @pytest.fixture()
-def user2():
+def user2() -> YieldFixture[AlgoUser]:
     """A second user account."""
     user = add_standalone_account()
 
@@ -39,7 +43,7 @@ def user2():
 
 
 @pytest.fixture()
-def user3():
+def user3() -> YieldFixture[AlgoUser]:
     """A third user account."""
     user = add_standalone_account()
 
@@ -50,7 +54,7 @@ def user3():
 
 
 @pytest.fixture()
-def user4():
+def user4() -> YieldFixture[AlgoUser]:
     """A fourth user account."""
     user = add_standalone_account()
 
@@ -61,11 +65,11 @@ def user4():
 
 
 @pytest.fixture()
-def create_user():
+def create_user() -> YieldFixture[Callable]:
     """A factory fixture to create an `AlgoUser`."""
     created_users = []
 
-    def _create_user(funded=True):
+    def _create_user(funded: bool = True) -> AlgoUser:
         user = add_standalone_account(funded=funded)
         created_users.append(user)
         return user
@@ -78,7 +82,7 @@ def create_user():
 
 
 @pytest.fixture()
-def smart_contract_id(owner):
+def smart_contract_id(owner: AlgoUser) -> YieldFixture[int]:
     """A smart contract instance."""
     # Create the smart contract
     app_id = create_app(

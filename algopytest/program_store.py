@@ -61,7 +61,7 @@ def initialize(
 
     # TODO
     if smart_signature is not None:
-        raise ValueError("Smart signature testing to be implemented!")
+        raise NotImplementedError("Smart signature testing to be implemented!")
 
     # Populate the `ProgramStore` with the appropriate values
     ProgramStore._populate(

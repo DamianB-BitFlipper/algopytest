@@ -172,7 +172,7 @@ def _initial_funds_account() -> AlgoUser:
     )
 
     if initial_address is None:
-        raise ValueError("Initial funds account not yet created!")
+        raise Exception("Initial funds account not yet created!")
 
     passphrase = _cli_passphrase_for_account(initial_address)
     private_key = mnemonic.to_private_key(passphrase)
