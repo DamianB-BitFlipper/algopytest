@@ -1,7 +1,8 @@
+docs/build
+
 # Python side-effects
 *.egg-info
 __pycache__
 
 # A file to write TODOs related to this project
 TODO
-

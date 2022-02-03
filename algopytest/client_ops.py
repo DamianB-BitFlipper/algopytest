@@ -8,6 +8,7 @@ import base64
 import pty
 import subprocess
 import time
+from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
 
@@ -136,7 +137,8 @@ def _wait_for_indexer(func: Callable) -> Callable:
     """A decorator function to automatically wait for indexer timeout
     when running `func`.
     """
-
+    # To preserve the original type signature of `func` in the sphinx docs
+    @wraps(func)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
         timeout = 0
         while timeout < ConfigParams.indexer_timeout:
