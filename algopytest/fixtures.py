@@ -4,7 +4,6 @@ import pytest
 
 from .account_ops import add_standalone_account, defund_account
 from .entities import AlgoUser
-from .program_store import ProgramStore
 from .transaction_ops import create_app, delete_app
 from .type_stubs import YieldFixture
 
@@ -84,14 +83,7 @@ def create_user() -> YieldFixture[Callable]:
 @pytest.fixture()
 def smart_contract_id(owner: AlgoUser) -> YieldFixture[int]:
     """A smart contract instance."""
-    # Create the smart contract
-    app_id = create_app(
-        owner,
-        ProgramStore.approval_compiled,
-        ProgramStore.clear_compiled,
-        ProgramStore.global_schema,
-        ProgramStore.local_schema,
-    )
+    app_id = create_app(owner)
 
     # This is where the testing happens
     yield app_id

@@ -5,6 +5,7 @@ from algosdk.future import transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
+from .program_store import ProgramStore
 from .type_stubs import PyTEAL
 
 
@@ -68,10 +69,10 @@ def transaction_boilerplate(
     format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
     return_fn=lambda txinfo: txinfo["application-index"],
 )
-def create_app(
+def create_custom_app(
     owner: AlgoUser,
-    approval_program: PyTEAL,
-    clear_program: PyTEAL,
+    approval_compiled: bytes,
+    clear_compiled: bytes,
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
     _params: transaction.SuggestedParams,
@@ -84,13 +85,24 @@ def create_app(
         owner.address,
         _params,
         on_complete,
-        approval_program,
-        clear_program,
+        approval_compiled,
+        clear_compiled,
         global_schema,
         local_schema,
     )
 
     return txn
+
+
+def create_app(owner: AlgoUser) -> transaction.Transaction:
+    """Set up the smart contract using the details in ``ProgramStore``."""
+    return create_custom_app(
+        owner,
+        ProgramStore.approval_compiled,
+        ProgramStore.clear_compiled,
+        ProgramStore.global_schema,
+        ProgramStore.local_schema,
+    )
 
 
 # Delete application
@@ -112,12 +124,16 @@ def delete_app(
 def update_app(
     owner: AlgoUser,
     app_id: int,
-    approval_program: PyTEAL,
-    clear_program: PyTEAL,
     _params: transaction.SuggestedParams,
+    approval_compiled: Optional[bytes] = None,
+    clear_compiled: Optional[bytes] = None,
 ) -> transaction.Transaction:
+    # Use the values in `ProgramStore` if the programs are set to `None`
+    approval_compiled = approval_compiled or ProgramStore.approval_compiled
+    clear_compiled = clear_compiled or ProgramStore.clear_compiled
+
     return transaction.ApplicationUpdateTxn(
-        owner.address, _params, app_id, approval_program, clear_program
+        owner.address, _params, app_id, approval_compiled, clear_compiled
     )
 
 
@@ -141,6 +157,44 @@ def close_out_app(
     sender: AlgoUser, app_id: int, _params: transaction.SuggestedParams
 ) -> transaction.Transaction:
     return transaction.ApplicationCloseOutTxn(sender.address, _params, app_id)
+
+
+# Clear from the application
+@transaction_boilerplate(
+    sender_account_argidx=0,
+    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+)
+def clear_app(
+    sender: AlgoUser,
+    app_id: int,
+    _params: transaction.SuggestedParams,
+) -> transaction.Transaction:
+    return transaction.ApplicationClearStateTxn(sender.address, _params, app_id)
+
+
+# Perform an application call
+@transaction_boilerplate(
+    sender_account_argidx=0,
+    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+)
+def call_app(
+    sender: AlgoUser,
+    app_id: int,
+    _params: transaction.SuggestedParams,
+    app_args: Optional[list[str]] = None,
+    accounts: Optional[list[str]] = None,
+) -> transaction.Transaction:
+    # Convert the `app_args` to bytes as expected by `ApplicationNoOpTxn`
+    # if app_args is not None:
+    #    app_args = list(map(lambda arg: bytes(arg, "utf-8"), app_args))
+
+    return transaction.ApplicationNoOpTxn(
+        sender.address,
+        _params,
+        app_id,
+        app_args,
+        accounts,
+    )
 
 
 # Send a payment transaction

@@ -22,11 +22,31 @@
 __version__ = "0.1.0"
 __author__ = "Damian Barabonkov"
 
-from .client_ops import application_global_state
+from .client_ops import application_global_state, compile_program
 from .program_store import initialize
+from .transaction_ops import (
+    call_app,
+    clear_app,
+    close_out_app,
+    create_app,
+    create_custom_app,
+    delete_app,
+    opt_in_app,
+    payment_transaction,
+    update_app,
+)
 
 # The functions to expose for sphinx documentation
 __all__ = [
     "application_global_state",
     "initialize",
+    "create_app",
+    "create_custom_app",
+    "delete_app",
+    "update_app",
+    "opt_in_app",
+    "close_out_app",
+    "clear_app",
+    "call_app",
+    "payment_transaction",
 ]

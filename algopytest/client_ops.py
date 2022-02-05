@@ -10,7 +10,7 @@ import subprocess
 import time
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from algosdk import mnemonic
 from algosdk.encoding import encode_address
@@ -163,16 +163,24 @@ def _initial_funds_account() -> AlgoUser:
     Such an account is used to transfer initial funds for the accounts
     created by this pytest plugin.
     """
-    initial_address = next(
-        (
-            account.get("address")
-            for account in _indexer_client().accounts().get("accounts", [{}, {}])
-            if account.get("created-at-round") == 0
-            and account.get("status") == "Online"  # "Online" for devMode
-        ),
-        None,
-    )
+    initial_address: Optional[str] = None
+    # Use the configured value, if available
+    if ConfigParams.initial_funds_account is not None:
+        initial_address = ConfigParams.initial_funds_account
+    else:
+        # Make an educated guess for the `initial_address` by
+        # reading addresses from the indexer
+        initial_address = next(
+            (
+                account.get("address")
+                for account in _indexer_client().accounts().get("accounts", [{}, {}])
+                if account.get("created-at-round") == 0
+                and account.get("status") == "Online"
+            ),
+            None,
+        )
 
+    # Sanity check
     if initial_address is None:
         raise Exception("Initial funds account not yet created!")
 
