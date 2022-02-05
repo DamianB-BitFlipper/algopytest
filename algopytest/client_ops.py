@@ -16,7 +16,12 @@ from algosdk import mnemonic
 from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
 from algosdk.future import transaction
-from algosdk.future.transaction import LogicSig, LogicSigTransaction, PaymentTxn
+from algosdk.future.transaction import (
+    LogicSig,
+    LogicSigTransaction,
+    PaymentTxn,
+    wait_for_confirmation,
+)
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
@@ -71,37 +76,6 @@ def call_sandbox_command(*args: str) -> subprocess.CompletedProcess:
 
 
 ## TRANSACTIONS
-def _wait_for_confirmation(client: Any, transaction_id: Any, timeout: Any) -> Any:
-    """
-    Wait until the transaction is confirmed or rejected, or until 'timeout'
-    number of rounds have passed.
-    Args:
-        transaction_id (str): the transaction to wait for
-        timeout (int): maximum number of rounds to wait
-    Returns:
-        dict: pending transaction information, or throws an error if the transaction
-            is not confirmed or rejected in the next timeout rounds
-    """
-    # TODO: replace me with py-algo-sdk wait for confirm function
-    start_round = client.status()["last-round"] + 1
-    current_round = start_round
-
-    while current_round < start_round + timeout:
-        try:
-            pending_txn = client.pending_transaction_info(transaction_id)
-        except Exception:
-            return
-        if pending_txn.get("confirmed-round", 0) > 0:
-            return pending_txn
-        elif pending_txn["pool-error"]:
-            raise Exception("pool error: {}".format(pending_txn["pool-error"]))
-        client.status_after_block(current_round)
-        current_round += 1
-    raise Exception(
-        "pending tx not found in timeout rounds, timeout value = : {}".format(timeout)
-    )
-
-
 def process_logic_sig_transaction(logic_sig: Any, payment_transaction: Any) -> Any:
     """Create logic signature transaction and send it to the network."""
     # TODO: Typing and general behavior
@@ -109,7 +83,7 @@ def process_logic_sig_transaction(logic_sig: Any, payment_transaction: Any) -> A
     client = _algod_client()
     logic_sig_transaction = LogicSigTransaction(payment_transaction, logic_sig)
     transaction_id = client.send_transaction(logic_sig_transaction)
-    _wait_for_confirmation(client, transaction_id, 4)
+    wait_for_confirmation(client, transaction_id, 4)
     return transaction_id
 
 
@@ -117,7 +91,7 @@ def process_transactions(transactions: list[transaction.Transaction]) -> int:
     """Send provided grouped `transactions` to network and wait for confirmation."""
     client = _algod_client()
     transaction_id = client.send_transactions(transactions)
-    _wait_for_confirmation(client, transaction_id, 4)
+    wait_for_confirmation(client, transaction_id, 4)
     return transaction_id
 
 

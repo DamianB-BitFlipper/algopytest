@@ -184,10 +184,6 @@ def call_app(
     app_args: Optional[list[str]] = None,
     accounts: Optional[list[str]] = None,
 ) -> transaction.Transaction:
-    # Convert the `app_args` to bytes as expected by `ApplicationNoOpTxn`
-    # if app_args is not None:
-    #    app_args = list(map(lambda arg: bytes(arg, "utf-8"), app_args))
-
     return transaction.ApplicationNoOpTxn(
         sender.address,
         _params,
