@@ -97,9 +97,17 @@ def process_transactions(transactions: list[transaction.Transaction]) -> int:
     return transaction_id
 
 
-def suggested_params() -> transaction.SuggestedParams:
-    """Return the suggested params from the algod client."""
-    return _algod_client().suggested_params()
+def suggested_params(**kwargs: Any) -> transaction.SuggestedParams:
+    """Return the suggested params from the algod client.
+
+    Set the provided attributes in ``kwargs`` in the suggested parameters.
+    """
+    params = _algod_client().suggested_params()
+
+    for key, value in kwargs.items():
+        setattr(params, key, value)
+
+    return params
 
 
 def pending_transaction_info(transaction_id: int) -> dict[str, Any]:

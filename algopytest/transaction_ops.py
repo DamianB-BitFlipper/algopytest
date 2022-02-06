@@ -9,6 +9,8 @@ from .entities import AlgoUser, NullUser
 from .program_store import ProgramStore
 from .type_stubs import PyTEAL
 
+SuggestedParams = suggested_params(flat_fee=True, fee=1000)
+
 
 def transaction_boilerplate(
     sender_account_argidx: int,
@@ -26,14 +28,6 @@ def transaction_boilerplate(
 
             # Extract the account from the function arguments
             sender = args[sender_account_argidx]
-
-            # Get node suggested parameters
-            params = suggested_params()
-            params.flat_fee = True
-            params.fee = 1000
-
-            # Augment the `kwargs` with the suggested `params`
-            kwargs["_params"] = params
 
             # Create unsigned transaction
             txn = func(*args, **kwargs)
@@ -77,7 +71,7 @@ def create_custom_app(
     clear_compiled: bytes,
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
-    _params: transaction.SuggestedParams,
+    params: transaction.SuggestedParams = SuggestedParams,
 ) -> transaction.Transaction:
     # Declare on_complete as NoOp
     on_complete = transaction.OnComplete.NoOpOC.real
@@ -85,7 +79,7 @@ def create_custom_app(
     # Create unsigned transaction
     txn = transaction.ApplicationCreateTxn(
         owner.address,
-        _params,
+        params,
         on_complete,
         approval_compiled,
         clear_compiled,
@@ -113,9 +107,9 @@ def create_app(owner: AlgoUser) -> transaction.Transaction:
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def delete_app(
-    owner: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+    owner: AlgoUser, app_id: int, params: transaction.SuggestedParams = SuggestedParams
 ) -> transaction.Transaction:
-    return transaction.ApplicationDeleteTxn(owner.address, _params, app_id)
+    return transaction.ApplicationDeleteTxn(owner.address, params, app_id)
 
 
 # Update existing application
@@ -126,16 +120,16 @@ def delete_app(
 def update_app(
     owner: AlgoUser,
     app_id: int,
-    _params: transaction.SuggestedParams,
     approval_compiled: Optional[bytes] = None,
     clear_compiled: Optional[bytes] = None,
+    params: transaction.SuggestedParams = SuggestedParams,
 ) -> transaction.Transaction:
     # Use the values in `ProgramStore` if the programs are set to `None`
     approval_compiled = approval_compiled or ProgramStore.approval_compiled
     clear_compiled = clear_compiled or ProgramStore.clear_compiled
 
     return transaction.ApplicationUpdateTxn(
-        owner.address, _params, app_id, approval_compiled, clear_compiled
+        owner.address, params, app_id, approval_compiled, clear_compiled
     )
 
 
@@ -145,9 +139,9 @@ def update_app(
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def opt_in_app(
-    sender: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+    sender: AlgoUser, app_id: int, params: transaction.SuggestedParams = SuggestedParams
 ) -> transaction.Transaction:
-    return transaction.ApplicationOptInTxn(sender.address, _params, app_id)
+    return transaction.ApplicationOptInTxn(sender.address, params, app_id)
 
 
 # Close out from application
@@ -156,9 +150,9 @@ def opt_in_app(
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def close_out_app(
-    sender: AlgoUser, app_id: int, _params: transaction.SuggestedParams
+    sender: AlgoUser, app_id: int, params: transaction.SuggestedParams = SuggestedParams
 ) -> transaction.Transaction:
-    return transaction.ApplicationCloseOutTxn(sender.address, _params, app_id)
+    return transaction.ApplicationCloseOutTxn(sender.address, params, app_id)
 
 
 # Clear from the application
@@ -169,9 +163,9 @@ def close_out_app(
 def clear_app(
     sender: AlgoUser,
     app_id: int,
-    _params: transaction.SuggestedParams,
+    params: transaction.SuggestedParams = SuggestedParams,
 ) -> transaction.Transaction:
-    return transaction.ApplicationClearStateTxn(sender.address, _params, app_id)
+    return transaction.ApplicationClearStateTxn(sender.address, params, app_id)
 
 
 # Perform an application call
@@ -182,13 +176,13 @@ def clear_app(
 def call_app(
     sender: AlgoUser,
     app_id: int,
-    _params: transaction.SuggestedParams,
     app_args: Optional[list[str]] = None,
     accounts: Optional[list[str]] = None,
+    params: transaction.SuggestedParams = SuggestedParams,
 ) -> transaction.Transaction:
     return transaction.ApplicationNoOpTxn(
         sender.address,
-        _params,
+        params,
         app_id,
         app_args,
         accounts,
@@ -203,13 +197,13 @@ def payment_transaction(
     sender: AlgoUser,
     receiver: AlgoUser,
     amount: int,
-    _params: transaction.SuggestedParams,
     note: str = "",
     close_remainder_to: AlgoUser = NullUser,
+    params: transaction.SuggestedParams = SuggestedParams,
 ) -> transaction.Transaction:
     return transaction.PaymentTxn(
         sender.address,
-        _params,
+        params,
         receiver.address,
         amount,
         note=note.encode(),
