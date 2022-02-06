@@ -3,6 +3,8 @@ Module containing helper functions for accessing Algorand blockchain.
 
 Inspired from: https://github.com/ipaleka/algorand-contracts-testing/blob/main/helpers.py
 """
+# So that sphinx picks up on the type aliases
+from __future__ import annotations
 
 import base64
 import pty
@@ -175,7 +177,7 @@ def transaction_info(transaction_id: int) -> dict[str, Any]:
 def application_global_state(app_id: int, addresses: list[str] = []) -> dict[str, str]:
     """Read the global state of an application.
 
-    The `addresses` are the keys where the value is expected
+    The ``addresses`` are the keys where the value is expected
     to be an Algorand address. Address values need to be
     encoded to get their human-readable forms.
     """

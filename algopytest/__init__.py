@@ -38,8 +38,9 @@ from .transaction_ops import (
 
 # The functions to expose for sphinx documentation
 __all__ = [
-    "application_global_state",
     "initialize",
+    "application_global_state",
+    "compile_program",
     "create_app",
     "create_custom_app",
     "delete_app",

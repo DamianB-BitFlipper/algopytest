@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Any, Callable, Optional
 
 from algosdk import account
@@ -19,6 +20,7 @@ def transaction_boilerplate(
     def decorator(func: Callable) -> Callable:
         """The actual decorator since it takes the arguments above."""
 
+        @wraps(func)
         def wrapped(*args: Any, **kwargs: Any) -> Any:
             print(f"Running {func.__name__}")
 

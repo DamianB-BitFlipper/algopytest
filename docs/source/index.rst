@@ -10,10 +10,8 @@ Welcome to AlgoPytest's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: algopytest
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   algopytest
+   fixtures
 
 Indices and tables
 ==================
