@@ -1,8 +1,11 @@
 docs/build
 
 # Python side-effects
+build
 *.egg-info
+*.pyc
 __pycache__
 
 # A file to write TODOs related to this project
 TODO
+README_scratches.md
