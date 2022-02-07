@@ -13,6 +13,8 @@ Welcome to AlgoPytest's documentation!
    algopytest
    fixtures
 
+.. mdinclude:: ../../README.md
+
 Indices and tables
 ==================
 

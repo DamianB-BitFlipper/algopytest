@@ -28,11 +28,13 @@ author = "Damian Barabonkov"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "m2r2",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosummary",
 ]
+source_suffix = [".rst", ".md"]
 
 napoleon_google_docstring = True
 
