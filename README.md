@@ -8,6 +8,7 @@ A lot of boilerplate code is necessary in order to setup a suitable test environ
 
 ### Prerequisites
 
+- Python 3 and `pip`
 - Install the Algorand [sandbox](https://github.com/algorand/sandbox).
 
 ### Installing AlgoPytest
@@ -149,3 +150,6 @@ pip install -e .
 ```
 
 Please submit a Pull Request for any suggested changes you would like to make.
+
+## Disclaimer
+**This package and smart contract(s) in this codebase have NOT been professionally audited. Therefore, they should not be used as a production application.****
