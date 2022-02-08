@@ -7,7 +7,7 @@ A lot of boilerplate code is necessary in order to setup a suitable test environ
 ## Getting Started
 
 The most relevant information needed for getting off the ground are:
-- [Read-The-Docs](https://algopytest.readthedocs.io/en/latest/) documentation
+- [Read-The-Docs documentation](https://algopytest.readthedocs.io/en/latest/)
 - [Installation](#installation)
 - [Simplified Usage](#simplified-usage)
 - [Demos](#demos)

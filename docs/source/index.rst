@@ -7,11 +7,12 @@ Welcome to AlgoPytest's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Table of Contents:
 
    algopytest
    fixtures
+   demos
 
 .. mdinclude:: ../../README.md
 
@@ -19,5 +20,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
