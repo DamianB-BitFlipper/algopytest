@@ -1,10 +1,20 @@
-# AlgoPytest -- Framework for Testing Algorand Smart Contracts using PyTest
+# AlgoPytest --- Framework for Testing Algorand Smart Contracts using PyTest
 
 *AlgoPytest* is a Pytest plugin framework which hides away all of the complexity and repetitiveness that comes with testing Algorand Smart Contracts. 
 
 A lot of boilerplate code is necessary in order to setup a suitable test environment. *AlgoPytest* takes care of all that. It handles deploying the smart contract, creating and funding any necessary user accounts and then using those accounts to interact with the smart contract itself. Additionally, each test is a run in a freshly deployed smart contract, facilitating a clean slate which prevents any stateful interference from any previously run tests. 
 
 ## Getting Started
+
+The most relevant information needed for getting off the ground are:
+- [Read-The-Docs](https://algopytest.readthedocs.io/en/latest/) documentation
+- [Installation](#installation)
+- [Simplified Usage](#simplified-usage)
+- [Demos](#demos)
+
+This project's Read-The-Docs page is especially useful, since it lists and describes all of the available methods and fixtures provided to you by *AlgoPytest*.
+
+## Installation
 
 ### Prerequisites
 
@@ -68,6 +78,49 @@ A simple test to make sure that the creator of the smart contract can update the
 def test_update_from_owner(owner, smart_contract_id):
     update_app(owner, smart_contract_id)
 ```
+
+## Demos
+
+This *AlgoPytest* project includes [demos](TODO) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples for how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
+
+For example, a semi-involved test in one of the demos, [algo-diploma](https://github.com/DamianB-BitFlipper/algo-diploma), showcases *AlgoPytest* utilizing the power of Pytest fixtures:
+
+```python
+@pytest.fixture
+def owner_in(owner, smart_contract_id):
+    """Create an ``owner`` fixture that has already opted in to ``smart_contract_id``."""
+    opt_in_app(owner, smart_contract_id)
+    
+    # The test runs here
+    yield owner
+
+    # Clean up by closing out of the application
+    close_out_app(owner, smart_contract_id)
+
+@pytest.fixture
+def user1_in(user1, smart_contract_id):
+    """Create a ``user1`` fixture that has already opted in to ``smart_contract_id``."""
+    opt_in_app(user1, smart_contract_id)
+
+    # The test runs here
+    yield user1
+
+    # Clean up by closing out of the application
+    close_out_app(user1, smart_contract_id)
+
+def test_issue_diploma(owner_in, user1_in, smart_contract_id):
+    diploma_metadata = "Damian Barabonkov :: MIT :: BSc Computer Science and Engineering :: 2020"
+
+    # The application arguments and account to be passed in to 
+    # the smart contract as it expects
+    app_args = ['issue_diploma', diploma_metadata]
+    accounts = [user1_in.address]
+
+    # Issue the `diploma_metadata` to the recipient `user1`
+    call_app(owner_in, smart_contract_id, app_args=app_args, accounts=accounts)
+```
+
+Original source may be found [here](https://github.com/DamianB-BitFlipper/algo-diploma/blob/master/tests/test_interaction.py).
 
 ## Detailed Usage
 Refer to the [Documentation References](./README.md#TODO) below for more specific explanations of key topics.
@@ -135,10 +188,6 @@ def test_update_from_owner(owner, smart_contract_id):
 - Pytest `pytest_configure`: [documentation](https://docs.pytest.org/en/6.2.x/reference.html#pytest.hookspec.pytest_configure)
 - Pytest `conftest.py`: [documentation](https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files)
 - *AlgoPytest* `initialize`: [documentation](https://algopytest.readthedocs.io/en/latest/algopytest.html#algopytest.initialize)
-
-## Demos
-
-This *AlgoPytest* project includes [demos](TODO) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples for how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
 
 ## Dev Installation
 ```bash
