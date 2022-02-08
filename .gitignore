@@ -6,6 +6,9 @@ build
 *.pyc
 __pycache__
 
+\#*
+.#*
+
 # A file to write TODOs related to this project
 TODO
 README_scratches.md

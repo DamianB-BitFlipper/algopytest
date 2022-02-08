@@ -1,4 +1,4 @@
-# AlgoPytest --- Framework for Testing Algorand Smart Contracts using PyTest
+# AlgoPytest &mdash; Framework for Testing Algorand Smart Contracts using PyTest
 
 *AlgoPytest* is a Pytest plugin framework which hides away all of the complexity and repetitiveness that comes with testing Algorand Smart Contracts. 
 
@@ -81,7 +81,7 @@ def test_update_from_owner(owner, smart_contract_id):
 
 ## Demos
 
-This *AlgoPytest* project includes [demos](TODO) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples for how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
+This *AlgoPytest* project includes [demos](TODO) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples of how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
 
 For example, a semi-involved test in one of the demos, [algo-diploma](https://github.com/DamianB-BitFlipper/algo-diploma), showcases *AlgoPytest* utilizing the power of Pytest fixtures:
 
@@ -123,7 +123,7 @@ def test_issue_diploma(owner_in, user1_in, smart_contract_id):
 Original source may be found [here](https://github.com/DamianB-BitFlipper/algo-diploma/blob/master/tests/test_interaction.py).
 
 ## Detailed Usage
-Refer to the [Documentation References](./README.md#TODO) below for more specific explanations of key topics.
+Refer to the [Documentation References](#documentation-references) below for more specific explanations of key topics.
 
 ### AlgoPytest Initialization
 Firstly, you must follow the Pytest directory structure. Essentially, all tests will be found within a `tests` directory in the root of your project.
