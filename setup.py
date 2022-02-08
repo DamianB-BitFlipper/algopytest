@@ -1,8 +1,10 @@
 from setuptools import setup
 
+version = "1.0.0"
+
 setup(
     name="algopytest",
-    version="1.0.0",
+    version=version,
     description="A pytest plugin to write Algorand smart contract test suites more easily",
     url="https://github.com/DamianB-BitFlipper/algopytest.git",
     author="Damian Barabonkov",
@@ -10,7 +12,7 @@ setup(
     license="MIT",
     packages=["algopytest"],
     keywords=["Algorand", "Smart Contract", "Pytest", "Unit Tests", "Test Suite"],
-    download_url="https://github.com/DamianB-BitFlipper/algopytest/archive/refs/tags/v1.0.0.tar.gz",
+    download_url=f"https://github.com/DamianB-BitFlipper/algopytest/archive/refs/tags/v{version}.tar.gz",
     install_requires=[
         "pytest",
         "py-algorand-sdk",
