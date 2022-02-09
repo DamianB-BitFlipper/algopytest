@@ -30,7 +30,7 @@ pip install algopytest-framework
 Make sure the sandbox is up and running. Preferably use a local network for your testing. Note: There is currently an issue with the `dev` sandbox which makes it work not too well with *AlgoPytest*. Networks `release` and `nightly` are more recommended.
 ```bash
 # Spin up the `release` network
-./sanbox up release
+./sandbox up release
 ```
 ---
 Set any necessary environment variables. 
@@ -38,10 +38,10 @@ Set any necessary environment variables.
 # The path to your sandbox so that AlgoPytest may interact with the sandbox
 export SANDBOX_DIR=/path/to/installation/of/sandbox/
 
-# The address in your `sanbox` which was allocated the initial funds
+# The address in your `sandbox` which was allocated the initial funds
 export INITIAL_FUNDS_ACCOUNT=4BJAN3J32NDMZJWU3DPIPGCPBQIUTXL3UB2LEG5Z3CFPRJZOOZC2GH5DMQ
 ```
-- List of environment variables recognized by *AlgoPytest*: [documentation](TODO).
+- List of environment variables recognized by *AlgoPytest*: [documentation](https://algopytest.readthedocs.io/en/latest/configuration.html).
 
 ----
 Create a `conftest.py` file in your Pytest `tests` directory and initialize *AlgoPytest* within as so:
