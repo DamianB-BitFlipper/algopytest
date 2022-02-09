@@ -10,6 +10,7 @@ Welcome to AlgoPytest's documentation!
    :maxdepth: 1
    :caption: Table of Contents:
 
+   configuration
    algopytest
    fixtures
    demos
