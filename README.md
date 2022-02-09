@@ -23,9 +23,7 @@ This project's Read-The-Docs page is especially useful, since it lists and descr
 
 ### Installing AlgoPytest
 ```bash
-git clone https://github.com/DamianB-BitFlipper/algopytest.git
-cd algopytest
-pip install .
+pip install algopytest-framework
 ```
 
 ## Simplified Usage
@@ -81,7 +79,7 @@ def test_update_from_owner(owner, smart_contract_id):
 
 ## Demos
 
-This *AlgoPytest* project includes [demos](TODO) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples of how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
+This *AlgoPytest* project includes [demos](https://algopytest.readthedocs.io/en/latest/demos.html) of Algorand Smart Contract projects that utilize this package to implement their test suite. These demo projects give examples of how a real-world project may use *AlgoPytest* for its testing. They provide greater context for how to integrate *AlgoPytest* into your project. The tests and the `initialization` code of the demos may be found within their respective `tests` directory. Therein, you will see how the fixtures are used to extensively stress test the Smart Contract code and life-cycle. 
 
 For example, a semi-involved test in one of the demos, [algo-diploma](https://github.com/DamianB-BitFlipper/algo-diploma), showcases *AlgoPytest* utilizing the power of Pytest fixtures:
 
