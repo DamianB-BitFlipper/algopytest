@@ -1,7 +1,9 @@
+# Sphinx files
 docs/build
 
 # Python side-effects
 build
+dist
 *.egg-info
 *.pyc
 __pycache__

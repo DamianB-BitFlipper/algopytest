@@ -1,5 +1,7 @@
 from setuptools import setup
 
+# Important: Update this when making new releases!
+# Be sure to update `version` in '__init__.py' as well
 version = "1.0.0"
 
 setup(
@@ -24,7 +26,7 @@ setup(
     classifiers=[
         "Framework :: Pytest",
         "Intended Audience :: Developers",
-        "Topic :: Software Development :: Testing Tools",
+        "Topic :: Software Development :: Testing :: Unit",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",

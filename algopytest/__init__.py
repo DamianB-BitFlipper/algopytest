@@ -19,7 +19,9 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 # OR OTHER DEALINGS IN THE SOFTWARE.
 
-__version__ = "0.1.0"
+# Important: Update this when making new releases!
+# Be sure to update `version` in 'setup.py' as well
+__version__ = "1.0.0"
 __author__ = "Damian Barabonkov"
 
 from .client_ops import application_global_state, compile_program
