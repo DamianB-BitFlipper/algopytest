@@ -56,6 +56,44 @@ def initialize(
     global_ints: int = 0,
     global_bytes: int = 0,
 ) -> None:
+    """Initialize AlgoPytest with the Algorand Smart Contract/Signature to be tested.
+
+    Initialization must occur before any Pytest test run. This is most easily achieved
+    by creating a file named ``conftest.py`` and calling ``initialize`` from within a
+    function named ``pytest_configure``.
+
+    Example
+    -------
+    .. code-block:: python
+
+        # File: conftets.py
+        def pytest_configure(config):
+            initialize(approval_program=diploma_program,
+                       clear_program=clear_program,
+                       local_bytes=1, global_bytes=1)
+
+    Parameters
+    ----------
+    approval_program
+        A function which generates the approval program of the smart contract as a PyTEAL expression.
+    clear_program
+        A function which generates the clear program of the smart contract as a PyTEAL expression.
+    smart_signature
+        Note: Not supported yet! A function which generates the smart signature as a PyTEAL expression.
+    mode
+        The mode with which to compile the supplied PyTEAL programs.
+    version
+        The version with which to compile the supplied PyTEAL programs.
+    local_ints
+        The local state integers schema count.
+    local_bytes
+        The local state bytes schema count.
+    global_ints
+        The global state integers schema count.
+    global_bytes
+        The global state bytes schema count.
+    """
+
     # Sanity check that either both `approval_program`
     # and `clear_program` are set or `smart_signature`
     # assert (approval_program is not None and clear_program is not None) or (

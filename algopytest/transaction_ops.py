@@ -61,7 +61,7 @@ def transaction_boilerplate(
     return decorator
 
 
-# Create new application
+# The return type is `int` modified by `return_fn`
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
@@ -75,6 +75,28 @@ def create_custom_app(
     local_schema: transaction.StateSchema,
     params: Optional[transaction.SuggestedParams],
 ) -> transaction.Transaction:
+    """Deploy a smart contract from the supplied details.
+
+    Parameters
+    ----------
+    owner
+        The user who will be the creator and owner of the smart contract.
+    approval_compiled
+        The TEAL compiled binary code of the approval program.
+    clear_compiled
+        The TEAL compiled binary code of the clear program.
+    global_schema
+        The global state schema details.
+    local_schema
+        The local state schema details.
+    params
+        Transaction parameters to use when sending the ``ApplicationCreateTxn`` into the Algorand network.
+
+    Returns
+    -------
+    int
+        The application ID of the deployed smart contract.
+    """
     # Declare on_complete as NoOp
     on_complete = transaction.OnComplete.NoOpOC.real
 
@@ -92,8 +114,19 @@ def create_custom_app(
     return txn
 
 
-def create_app(owner: AlgoUser) -> transaction.Transaction:
-    """Set up the smart contract using the details in ``ProgramStore``."""
+def create_app(owner: AlgoUser) -> int:
+    """Deploy the smart contract from the details supplied during initialization of `AlgoPytest`.
+
+    Parameters
+    ----------
+    owner
+        The user who will be the creator and owner of the smart contract.
+
+    Returns
+    -------
+    int
+        The application ID of the deployed smart contract.
+    """
     return create_custom_app(
         owner,
         ProgramStore.approval_compiled,
@@ -103,7 +136,7 @@ def create_app(owner: AlgoUser) -> transaction.Transaction:
     )
 
 
-# Delete application
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -111,10 +144,25 @@ def create_app(owner: AlgoUser) -> transaction.Transaction:
 def delete_app(
     owner: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
 ) -> transaction.Transaction:
+    """Delete a deployed smart contract.
+
+    Parameters
+    ----------
+    owner
+        The creator of the smart contract
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationDeleteTxn`` into the Algorand network.
+
+    Returns
+    -------
+    None
+    """
     return transaction.ApplicationDeleteTxn(owner.address, params, app_id)
 
 
-# Update existing application
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -126,6 +174,25 @@ def update_app(
     approval_compiled: Optional[bytes] = None,
     clear_compiled: Optional[bytes] = None,
 ) -> transaction.Transaction:
+    """Update a deployed smart contract.
+
+    Parameters
+    ----------
+    owner
+        The creator of the smart contract
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationUpdateTxn`` into the Algorand network.
+    approval_compiled
+        The TEAL compiled binary code of the approval program.
+    clear_compiled
+        The TEAL compiled binary code of the clear program.
+
+    Returns
+    -------
+    None
+    """
     # Use the values in `ProgramStore` if the programs are set to `None`
     approval_compiled = approval_compiled or ProgramStore.approval_compiled
     clear_compiled = clear_compiled or ProgramStore.clear_compiled
@@ -135,7 +202,7 @@ def update_app(
     )
 
 
-# Opt-in to application
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -143,10 +210,25 @@ def update_app(
 def opt_in_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
 ) -> transaction.Transaction:
+    """Opt-in to a deployed smart contract.
+
+    Parameters
+    ----------
+    sender
+        The account to opt-in to the smart contract.
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationOptInTxn`` into the Algorand network.
+
+    Returns
+    -------
+    None
+    """
     return transaction.ApplicationOptInTxn(sender.address, params, app_id)
 
 
-# Close out from application
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -154,10 +236,25 @@ def opt_in_app(
 def close_out_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
 ) -> transaction.Transaction:
+    """Close-out from a deployed smart contract.
+
+    Parameters
+    ----------
+    sender
+        The account to close-out from the smart contract.
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationCloseOutTxn`` into the Algorand network.
+
+    Returns
+    -------
+    None
+    """
     return transaction.ApplicationCloseOutTxn(sender.address, params, app_id)
 
 
-# Clear from the application
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -165,10 +262,25 @@ def close_out_app(
 def clear_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
 ) -> transaction.Transaction:
+    """Clear from a deployed smart contract.
+
+    Parameters
+    ----------
+    sender
+        The account to clear from the smart contract.
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationClearStateTxn`` into the Algorand network.
+
+    Returns
+    -------
+    None
+    """
     return transaction.ApplicationClearStateTxn(sender.address, params, app_id)
 
 
-# Perform an application call
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
@@ -180,6 +292,25 @@ def call_app(
     app_args: Optional[list[str]] = None,
     accounts: Optional[list[str]] = None,
 ) -> transaction.Transaction:
+    """Perform an application call to a deployed smart contract.
+
+    Parameters
+    ----------
+    sender
+        The account to perform the application call to the smart contract.
+    app_id
+        The application ID of the deployed smart contract.
+    params
+        Transaction parameters to use when sending the ``ApplicationNoOpTxn`` into the Algorand network.
+    app_args
+        Any arguments to pass along with the application call.
+    accounts
+        Any Algorand account addresses to pass along with the application call.
+
+    Returns
+    -------
+    None
+    """
     return transaction.ApplicationNoOpTxn(
         sender.address,
         params,
@@ -189,7 +320,7 @@ def call_app(
     )
 
 
-# Send a payment transaction
+# Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
     sender_account_argidx=0,
 )
@@ -201,6 +332,27 @@ def payment_transaction(
     note: str = "",
     close_remainder_to: AlgoUser = NullUser,
 ) -> transaction.Transaction:
+    """Perform an Algorand payment transaction.
+
+    Parameters
+    ----------
+    sender
+        The account to send the Algorand transaction payment.
+    receiver
+        The account to receive the Algorand transaction payment
+    amount
+        The amount of microAlgos (10e-6 Algos) to transact.
+    params
+        Transaction parameters to use when sending the ``PaymentTxn`` into the Algorand network.
+    note
+        A note to attach along with the payment transaction.
+    close_remainder_to
+        An Algorand address to close any remainder to.
+
+    Returns
+    -------
+    None
+    """
     return transaction.PaymentTxn(
         sender.address,
         params,

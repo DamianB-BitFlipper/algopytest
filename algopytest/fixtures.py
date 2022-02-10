@@ -13,7 +13,16 @@ from .type_stubs import YieldFixture
 
 @pytest.fixture()
 def owner() -> YieldFixture[AlgoUser]:
-    """An owner account."""
+    """A funded owner account.
+
+    This is a regular Algorand account that is automatically funded upon creation.
+    Its name implies that its main purpose is as the creator and administrator
+    account of an Algorand smart contract application.
+
+    Yields
+    ------
+    AlgoUser
+    """
     owner = add_standalone_account()
 
     yield owner
@@ -24,7 +33,14 @@ def owner() -> YieldFixture[AlgoUser]:
 
 @pytest.fixture()
 def user1() -> YieldFixture[AlgoUser]:
-    """A user account."""
+    """A funded user account.
+
+    This is an Algorand account that is automatically funded upon creation.
+
+    Yields
+    ------
+    AlgoUser
+    """
     user = add_standalone_account()
 
     yield user
@@ -35,7 +51,14 @@ def user1() -> YieldFixture[AlgoUser]:
 
 @pytest.fixture()
 def user2() -> YieldFixture[AlgoUser]:
-    """A second user account."""
+    """A second funded user account.
+
+    This is an Algorand account that is automatically funded upon creation.
+
+    Yields
+    ------
+    AlgoUser
+    """
     user = add_standalone_account()
 
     yield user
@@ -46,7 +69,14 @@ def user2() -> YieldFixture[AlgoUser]:
 
 @pytest.fixture()
 def user3() -> YieldFixture[AlgoUser]:
-    """A third user account."""
+    """A third funded user account.
+
+    This is an Algorand account that is automatically funded upon creation.
+
+    Yields
+    ------
+    AlgoUser
+    """
     user = add_standalone_account()
 
     yield user
@@ -57,7 +87,14 @@ def user3() -> YieldFixture[AlgoUser]:
 
 @pytest.fixture()
 def user4() -> YieldFixture[AlgoUser]:
-    """A fourth user account."""
+    """A fourth funded user account.
+
+    This is an Algorand account that is automatically funded upon creation.
+
+    Yields
+    ------
+    AlgoUser
+    """
     user = add_standalone_account()
 
     yield user
@@ -68,7 +105,30 @@ def user4() -> YieldFixture[AlgoUser]:
 
 @pytest.fixture()
 def create_user() -> YieldFixture[Callable]:
-    """A factory fixture to create an `AlgoUser`."""
+    """A factory fixture to create funded user accounts.
+
+    Every time this factory fixture is called, a new funded Algorand account is created.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_vote_from_many_users(smart_contract_id, create_user):
+            users = []
+
+            # Create 10 separate users
+            for i in range(10):
+                users.append(create_user())
+
+            # Everyone votes for the first user
+            for user in users:
+                call_app(user, smart_contract_id, app_args=[\"vote\"], accounts=[user[0]])
+
+    Yields
+    ------
+    Callable[[], AlgoUser]
+        A function taking no arguments and producing an ``AlgoUser``.
+    """
     created_users = []
 
     def _create_user(funded: bool = True) -> AlgoUser:
@@ -85,7 +145,28 @@ def create_user() -> YieldFixture[Callable]:
 
 @pytest.fixture()
 def smart_contract_id(owner: AlgoUser) -> YieldFixture[int]:
-    """A smart contract instance."""
+    """The application ID of the smart contract supplied during initialization of `AlgoPytest`.
+
+    This fixture automatically deploys the smart contract and yields the resulting application ID.
+    After the respective test is over, this fixture then cleans up after itself and deletes
+    the smart contract application.
+
+    Example
+    -------
+    .. code-block:: python
+
+        def test_update_from_owner(owner, smart_contract_id):
+            update_app(owner, smart_contract_id)
+
+    Parameters
+    ----------
+    owner
+       All this means is that this fixture depends on the ``owner`` fixture. Use this fixture as an ``int`` variable.
+
+    Yields
+    ------
+    int
+    """
     app_id = create_app(owner)
 
     # This is where the testing happens

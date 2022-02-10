@@ -185,9 +185,17 @@ def transaction_info(transaction_id: int) -> dict[str, Any]:
 def application_global_state(app_id: int, addresses: list[str] = []) -> dict[str, str]:
     """Read the global state of an application.
 
-    The ``addresses`` are the keys where the value is expected
-    to be an Algorand address. Address values need to be
-    encoded to get their human-readable forms.
+    Parameters
+    ----------
+    app_id
+       The ID of the application to query for its global state.
+    addresses
+       The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
+
+    Returns
+    -------
+    dict[str, str]
+        The global state query results.
     """
     app = _indexer_client().applications(app_id)
     app_global_state = app["application"]["params"]["global-state"]
@@ -211,7 +219,22 @@ def _compile_source(source: str) -> bytes:
 def compile_program(
     program: PyTEAL, mode: Mode = Mode.Application, version: int = 5
 ) -> bytes:
-    """Compiles a PyTEAL smart contract program to the teal binary code."""
+    """Compiles a PyTEAL smart contract program to the TEAL binary code.
+
+    Parameters
+    ----------
+    program
+        A function which generates a PyTEAL expression, representing an Algorand program.
+    mode
+        The mode with which to compile the supplied PyTEAL program.
+    version
+        The version with which to compile the supplied PyTEAL program.
+
+    Returns
+    -------
+    bytes
+        The TEAL compiled binary code.
+    """
     source = compileTeal(program(), mode=mode, version=version)
     return _compile_source(source)
 
