@@ -24,7 +24,11 @@
 __version__ = "1.0.0"
 __author__ = "Damian Barabonkov"
 
-from .client_ops import application_global_state, compile_program
+from .client_ops import (
+    application_global_state,
+    application_local_state,
+    compile_program,
+)
 from .program_store import initialize
 from .transaction_ops import (
     call_app,
@@ -42,6 +46,7 @@ from .transaction_ops import (
 __all__ = [
     "initialize",
     "application_global_state",
+    "application_local_state",
     "compile_program",
     "create_app",
     "create_custom_app",

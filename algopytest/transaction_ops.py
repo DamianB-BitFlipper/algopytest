@@ -361,3 +361,14 @@ def payment_transaction(
         note=note.encode(),
         close_remainder_to=close_remainder_to.address,
     )
+
+
+# Returns `None` because of the `transaction_boilerplate` decorator
+@transaction_boilerplate(
+    sender_account_argidx=0,
+)
+def group_transaction(
+    sender: AlgoUser,
+    transactions: list[transaction.Transaction],
+) -> transaction.TxGroup:
+    return transaction.TxGroup(transactions)

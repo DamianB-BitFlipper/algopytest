@@ -124,6 +124,12 @@ def _wait_for_indexer(func: Callable) -> Callable:
     # To preserve the original type signature of `func` in the sphinx docs
     @wraps(func)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
+        # First wait for the indexer to catch up with the latest `algod_round`
+        algod_round = _algod_client().status()["last-round"]
+        while _indexer_client().health()["round"] < algod_round:
+            time.sleep(1)
+
+        # Give the indexer a number of tries before erroring out
         timeout = 0
         while timeout < ConfigParams.indexer_timeout:
             try:
@@ -182,14 +188,16 @@ def transaction_info(transaction_id: int) -> dict[str, Any]:
 
 
 @_wait_for_indexer
-def application_global_state(app_id: int, addresses: list[str] = []) -> dict[str, str]:
+def application_global_state(
+    app_id: int, address_fields: list[str] = []
+) -> dict[str, str]:
     """Read the global state of an application.
 
     Parameters
     ----------
     app_id
        The ID of the application to query for its global state.
-    addresses
+    address_fields
        The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
 
     Returns
@@ -199,7 +207,39 @@ def application_global_state(app_id: int, addresses: list[str] = []) -> dict[str
     """
     app = _indexer_client().applications(app_id)
     app_global_state = app["application"]["params"]["global-state"]
-    return _convert_algo_dict(app_global_state, addresses)
+    return _convert_algo_dict(app_global_state, address_fields)
+
+
+@_wait_for_indexer
+def application_local_state(
+    app_id: int, address: str, address_fields: list[str] = []
+) -> dict[str, str]:
+    """Read the local sate of an account relating to an application.
+
+    Parameters
+    ----------
+    app_id
+       The ID of the application to query for the local state.
+    address
+       The address of the account whose local state to read.
+    address_fields
+       The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
+
+    Returns
+    -------
+    dict[str, str]
+        The local state query results.
+    """
+    account = _indexer_client().account_info(address)["account"]
+
+    # Use get to index `account` since it may not have any local states yet
+    ret = {}
+    for local_state in account.get("apps-local-state", []):
+        if local_state["id"] == app_id:
+            ret = _convert_algo_dict(local_state["key-value"], address_fields)
+            break
+
+    return ret
 
 
 @_wait_for_indexer
@@ -254,7 +294,7 @@ def _base64_to_str(b64: str) -> str:
 
 
 def _convert_algo_dict(
-    algo_dict: list[dict[str, Any]], addresses: list[str]
+    algo_dict: list[dict[str, Any]], address_fields: list[str]
 ) -> dict[str, str]:
     """Converts an Algorand dictionary to a Python one."""
     ret = {}
@@ -265,9 +305,9 @@ def _convert_algo_dict(
 
         if value_type == 0:  # Integer
             value = entry["value"]["uint"]
-        elif value_type == 1 and key not in addresses:  # Bytes non-address
+        elif value_type == 1 and key not in address_fields:  # Bytes non-address
             value = _base64_to_str(entry["value"]["bytes"])
-        elif value_type == 1 and key in addresses:  # Bytes address
+        elif value_type == 1 and key in address_fields:  # Bytes address
             value = encode_address(base64.b64decode(entry["value"]["bytes"]))
         else:
             raise ValueError(f"Unknown value type for key: {key}")
