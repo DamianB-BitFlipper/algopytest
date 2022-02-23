@@ -25,9 +25,11 @@ __version__ = "1.0.0"
 __author__ = "Damian Barabonkov"
 
 from .client_ops import (
+    account_balance,
     application_global_state,
     application_local_state,
     compile_program,
+    suggested_params,
 )
 from .program_store import initialize
 from .transaction_ops import (
@@ -37,6 +39,8 @@ from .transaction_ops import (
     create_app,
     create_custom_app,
     delete_app,
+    group_elem,
+    group_transaction,
     opt_in_app,
     payment_transaction,
     update_app,
@@ -45,9 +49,11 @@ from .transaction_ops import (
 # The functions to expose for sphinx documentation
 __all__ = [
     "initialize",
+    "account_balance",
     "application_global_state",
     "application_local_state",
     "compile_program",
+    "suggested_params",
     "create_app",
     "create_custom_app",
     "delete_app",
@@ -57,4 +63,6 @@ __all__ = [
     "clear_app",
     "call_app",
     "payment_transaction",
+    "group_elem",
+    "group_transaction",
 ]

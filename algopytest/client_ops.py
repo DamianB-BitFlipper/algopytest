@@ -212,7 +212,7 @@ def application_global_state(
 
 @_wait_for_indexer
 def application_local_state(
-    app_id: int, address: str, address_fields: list[str] = []
+    app_id: int, account: AlgoUser, address_fields: list[str] = []
 ) -> dict[str, str]:
     """Read the local sate of an account relating to an application.
 
@@ -220,8 +220,8 @@ def application_local_state(
     ----------
     app_id
        The ID of the application to query for the local state.
-    address
-       The address of the account whose local state to read.
+    account
+       The user whose local state to read.
     address_fields
        The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
 
@@ -230,11 +230,11 @@ def application_local_state(
     dict[str, str]
         The local state query results.
     """
-    account = _indexer_client().account_info(address)["account"]
+    account_data = _indexer_client().account_info(account.address)["account"]
 
     # Use get to index `account` since it may not have any local states yet
     ret = {}
-    for local_state in account.get("apps-local-state", []):
+    for local_state in account_data.get("apps-local-state", []):
         if local_state["id"] == app_id:
             ret = _convert_algo_dict(local_state["key-value"], address_fields)
             break
@@ -243,10 +243,10 @@ def application_local_state(
 
 
 @_wait_for_indexer
-def account_balance(address: str) -> int:
-    """Return the balance amount for the provided `address`."""
-    account = _indexer_client().account_info(address)["account"]
-    return account["amount"]
+def account_balance(account: AlgoUser) -> int:
+    """Return the balance amount for the provided `account`."""
+    account_data = _indexer_client().account_info(account.address)["account"]
+    return account_data["amount"]
 
 
 ## UTILITY
@@ -303,12 +303,12 @@ def _convert_algo_dict(
 
         value_type = entry["value"]["type"]
 
-        if value_type == 0:  # Integer
-            value = entry["value"]["uint"]
-        elif value_type == 1 and key not in address_fields:  # Bytes non-address
+        if value_type == 1 and key not in address_fields:  # Bytes non-address
             value = _base64_to_str(entry["value"]["bytes"])
         elif value_type == 1 and key in address_fields:  # Bytes address
             value = encode_address(base64.b64decode(entry["value"]["bytes"]))
+        elif value_type == 2:  # Integer
+            value = entry["value"]["uint"]
         else:
             raise ValueError(f"Unknown value type for key: {key}")
 

@@ -3,6 +3,7 @@ from typing import Any, Callable, Optional
 
 from algosdk import account
 from algosdk.future import transaction
+from mypy_extensions import VarArg
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
@@ -11,7 +12,9 @@ from .type_stubs import PyTEAL
 
 
 def transaction_boilerplate(
-    sender_account_argidx: int,
+    no_log: bool = False,
+    no_params: bool = False,
+    no_sign: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
 ) -> Callable:
@@ -22,34 +25,58 @@ def transaction_boilerplate(
 
         @wraps(func)
         def wrapped(*args: Any, **kwargs: Any) -> Any:
-            print(f"Running {func.__name__}")
+            # Filter all decorator arguments identified by `__` at the
+            # start and remove them from the `kwargs`
+            decorator_args = {k: v for k, v in kwargs.items() if k.startswith("__")}
+            for decorator_key in decorator_args:
+                del kwargs[decorator_key]
 
-            # Extract the account from the function arguments
-            sender = args[sender_account_argidx]
+            # Pre-process the `decorator_args` and `kwargs` as necessary
+            log: Callable[[VarArg(Any)], None] = print
+            if decorator_args.get("__no_log", no_log):
+                # Disable logging
+                def ignore(*args: Any) -> None:
+                    return None
 
-            # If `params` was not supplied, insert the suggested parameters
-            if "params" not in kwargs or kwargs["params"] is None:
+                log = ignore
+
+            # If `params` was not supplied, insert the suggested
+            # parameters unless disabled by `no_params`
+            if kwargs.get("params", None) is None and not decorator_args.get(
+                "__no_params", no_params
+            ):
                 kwargs["params"] = suggested_params(flat_fee=True, fee=1000)
 
-            # Create unsigned transaction
-            txn = func(*args, **kwargs)
+            log(f"Running {func.__name__}")
 
-            # Sign transaction
-            signed_txn = txn.sign(sender.private_key)
+            # Create unsigned transaction
+            signer, txn = func(*args, **kwargs)
+
+            # Return the `signer` and `txn` if no signing was requested
+            if decorator_args.get("__no_sign", no_sign):
+                return signer, txn
+
+            # Sign the transaction
+            signed_output = txn.sign(signer.private_key)
+
+            # If the `signed_output` is not a list, wrap it
+            # in one as a singular transaction to be sent
+            if type(signed_output) is not list:
+                signed_output = [signed_output]
 
             # Send the transaction and await for confirmation
-            tx_id = process_transactions([signed_txn])
+            tx_id = process_transactions(signed_output)
 
             # Display results
             transaction_response = pending_transaction_info(tx_id)
 
             if format_finish is not None:
-                print(
+                log(
                     f"Finished {func.__name__} with: ",
                     format_finish(transaction_response),
                 )
             else:
-                print(f"Finished {func.__name__}")
+                log(f"Finished {func.__name__}")
 
             if return_fn is not None:
                 return return_fn(transaction_response)
@@ -63,7 +90,6 @@ def transaction_boilerplate(
 
 # The return type is `int` modified by `return_fn`
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
     return_fn=lambda txinfo: txinfo["application-index"],
 )
@@ -74,7 +100,7 @@ def create_custom_app(
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
     params: Optional[transaction.SuggestedParams],
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
 
     Parameters
@@ -111,7 +137,7 @@ def create_custom_app(
         local_schema,
     )
 
-    return txn
+    return owner, txn
 
 
 def create_app(owner: AlgoUser) -> int:
@@ -138,12 +164,11 @@ def create_app(owner: AlgoUser) -> int:
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def delete_app(
     owner: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Delete a deployed smart contract.
 
     Parameters
@@ -159,12 +184,12 @@ def delete_app(
     -------
     None
     """
-    return transaction.ApplicationDeleteTxn(owner.address, params, app_id)
+    txn = transaction.ApplicationDeleteTxn(owner.address, params, app_id)
+    return owner, txn
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def update_app(
@@ -173,7 +198,7 @@ def update_app(
     params: Optional[transaction.SuggestedParams],
     approval_compiled: Optional[bytes] = None,
     clear_compiled: Optional[bytes] = None,
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Update a deployed smart contract.
 
     Parameters
@@ -197,19 +222,20 @@ def update_app(
     approval_compiled = approval_compiled or ProgramStore.approval_compiled
     clear_compiled = clear_compiled or ProgramStore.clear_compiled
 
-    return transaction.ApplicationUpdateTxn(
+    txn = transaction.ApplicationUpdateTxn(
         owner.address, params, app_id, approval_compiled, clear_compiled
     )
+
+    return owner, txn
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def opt_in_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
     Parameters
@@ -225,17 +251,17 @@ def opt_in_app(
     -------
     None
     """
-    return transaction.ApplicationOptInTxn(sender.address, params, app_id)
+    txn = transaction.ApplicationOptInTxn(sender.address, params, app_id)
+    return sender, txn
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def close_out_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Close-out from a deployed smart contract.
 
     Parameters
@@ -251,17 +277,17 @@ def close_out_app(
     -------
     None
     """
-    return transaction.ApplicationCloseOutTxn(sender.address, params, app_id)
+    txn = transaction.ApplicationCloseOutTxn(sender.address, params, app_id)
+    return sender, txn
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def clear_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Clear from a deployed smart contract.
 
     Parameters
@@ -277,12 +303,12 @@ def clear_app(
     -------
     None
     """
-    return transaction.ApplicationClearStateTxn(sender.address, params, app_id)
+    txn = transaction.ApplicationClearStateTxn(sender.address, params, app_id)
+    return sender, txn
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    sender_account_argidx=0,
     format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
 )
 def call_app(
@@ -291,7 +317,7 @@ def call_app(
     params: Optional[transaction.SuggestedParams],
     app_args: Optional[list[str]] = None,
     accounts: Optional[list[str]] = None,
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Perform an application call to a deployed smart contract.
 
     Parameters
@@ -311,7 +337,7 @@ def call_app(
     -------
     None
     """
-    return transaction.ApplicationNoOpTxn(
+    txn = transaction.ApplicationNoOpTxn(
         sender.address,
         params,
         app_id,
@@ -319,11 +345,11 @@ def call_app(
         accounts,
     )
 
+    return sender, txn
+
 
 # Returns `None` because of the `transaction_boilerplate` decorator
-@transaction_boilerplate(
-    sender_account_argidx=0,
-)
+@transaction_boilerplate()
 def payment_transaction(
     sender: AlgoUser,
     receiver: AlgoUser,
@@ -331,7 +357,7 @@ def payment_transaction(
     params: Optional[transaction.SuggestedParams],
     note: str = "",
     close_remainder_to: AlgoUser = NullUser,
-) -> transaction.Transaction:
+) -> tuple[AlgoUser, transaction.Transaction]:
     """Perform an Algorand payment transaction.
 
     Parameters
@@ -353,7 +379,7 @@ def payment_transaction(
     -------
     None
     """
-    return transaction.PaymentTxn(
+    txn = transaction.PaymentTxn(
         sender.address,
         params,
         receiver.address,
@@ -362,13 +388,45 @@ def payment_transaction(
         close_remainder_to=close_remainder_to.address,
     )
 
+    return sender, txn
 
-# Returns `None` because of the `transaction_boilerplate` decorator
+
+def group_elem(txn_factory: Callable) -> Callable:
+    def no_sign_factory(
+        *args: Any, **kwargs: Any
+    ) -> tuple[AlgoUser, transaction.Transaction]:
+        # Disable signing and logging within the `txn_factory`
+        return txn_factory(*args, __no_sign=True, __no_log=True, **kwargs)
+
+    return no_sign_factory
+
+
+class _GroupTxn:
+    def __init__(self, transactions: list[tuple[AlgoUser, transaction.Transaction]]):
+        # Separate out the `signers` and the `txns`
+        signers = [signer for signer, _ in transactions]
+        txns = [txn for _, txn in transactions]
+
+        # Save the `signers` and `txns` with the group ID set
+        self.signers = signers
+        self.txns = transaction.assign_group_id(txns)
+
+    def sign(self, _: str) -> list[transaction.SignedTransaction]:
+        # Sign all of the transactions
+        signed_txns = []
+        for signer, txn in zip(self.signers, self.txns):
+            signed_txns.append(txn.sign(signer.private_key))
+
+        return signed_txns
+
+
 @transaction_boilerplate(
-    sender_account_argidx=0,
+    no_params=True,
 )
 def group_transaction(
-    sender: AlgoUser,
-    transactions: list[transaction.Transaction],
-) -> transaction.TxGroup:
-    return transaction.TxGroup(transactions)
+    *transactions: tuple[AlgoUser, transaction.Transaction],
+) -> tuple[AlgoUser, _GroupTxn]:
+    # The signers are already included as the first elements
+    # of the tuples in `transactions`, so return the `NullUser`
+    # as the signer of this group transaction
+    return NullUser, _GroupTxn(list(transactions))
