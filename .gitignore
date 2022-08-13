@@ -10,7 +10,10 @@ __pycache__
 
 \#*
 .#*
+private_*
+.~lock*
 
 # A file to write TODOs related to this project
 TODO
 README_scratches.md
+SPECIFICATIONS.*

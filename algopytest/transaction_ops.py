@@ -3,11 +3,10 @@ from typing import Any, Callable, Optional
 
 from algosdk import account
 from algosdk.future import transaction
-from mypy_extensions import VarArg
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
-from .program_store import ProgramStore
+from .program_store import ProgramsStore
 from .type_stubs import PyTEAL
 
 
@@ -32,7 +31,7 @@ def transaction_boilerplate(
                 del kwargs[decorator_key]
 
             # Pre-process the `decorator_args` and `kwargs` as necessary
-            log: Callable[[VarArg(Any)], None] = print
+            log: Callable[..., None] = print
             if decorator_args.get("__no_log", no_log):
                 # Disable logging
                 def ignore(*args: Any) -> None:
@@ -140,11 +139,13 @@ def create_custom_app(
     return owner, txn
 
 
-def create_app(owner: AlgoUser) -> int:
+def create_app(app_name: str, owner: AlgoUser) -> int:
     """Deploy the smart contract from the details supplied during initialization of `AlgoPytest`.
 
     Parameters
     ----------
+    app_name
+        The name of the smart contract from registration with AlgoPytest.
     owner
         The user who will be the creator and owner of the smart contract.
 
@@ -153,12 +154,17 @@ def create_app(owner: AlgoUser) -> int:
     int
         The application ID of the deployed smart contract.
     """
+    if app_name not in ProgramsStore.programs:
+        raise ValueError(f"No smart contract registered with name: {app_name}")
+
+    smart_contract = ProgramsStore.programs[app_name]
+
     return create_custom_app(
         owner,
-        ProgramStore.approval_compiled,
-        ProgramStore.clear_compiled,
-        ProgramStore.global_schema,
-        ProgramStore.local_schema,
+        smart_contract.approval_compiled,
+        smart_contract.clear_compiled,
+        smart_contract.global_schema,
+        smart_contract.local_schema,
     )
 
 
@@ -218,9 +224,9 @@ def update_app(
     -------
     None
     """
-    # Use the values in `ProgramStore` if the programs are set to `None`
-    approval_compiled = approval_compiled or ProgramStore.approval_compiled
-    clear_compiled = clear_compiled or ProgramStore.clear_compiled
+    # Use the values in `ProgramsStore` if the programs are set to `None`
+    approval_compiled = approval_compiled or ProgramsStore.approval_compiled
+    clear_compiled = clear_compiled or ProgramsStore.clear_compiled
 
     txn = transaction.ApplicationUpdateTxn(
         owner.address, params, app_id, approval_compiled, clear_compiled

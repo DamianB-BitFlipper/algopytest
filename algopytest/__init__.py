@@ -31,7 +31,7 @@ from .client_ops import (
     compile_program,
     suggested_params,
 )
-from .program_store import initialize
+from .program_store import register_smart_contract
 from .transaction_ops import (
     call_app,
     clear_app,
@@ -48,7 +48,6 @@ from .transaction_ops import (
 
 # The functions to expose for sphinx documentation
 __all__ = [
-    "initialize",
     "account_balance",
     "application_global_state",
     "application_local_state",
@@ -65,4 +64,5 @@ __all__ = [
     "payment_transaction",
     "group_elem",
     "group_transaction",
+    "register_smart_contract",
 ]
