@@ -201,9 +201,9 @@ def delete_app(
 def update_app(
     owner: AlgoUser,
     app_id: int,
+    approval_compiled: bytes,
+    clear_compiled: bytes,
     params: Optional[transaction.SuggestedParams],
-    approval_compiled: Optional[bytes] = None,
-    clear_compiled: Optional[bytes] = None,
 ) -> tuple[AlgoUser, transaction.Transaction]:
     """Update a deployed smart contract.
 
@@ -213,21 +213,17 @@ def update_app(
         The creator of the smart contract
     app_id
         The application ID of the deployed smart contract.
-    params
-        Transaction parameters to use when sending the ``ApplicationUpdateTxn`` into the Algorand network.
     approval_compiled
         The TEAL compiled binary code of the approval program.
     clear_compiled
         The TEAL compiled binary code of the clear program.
+    params
+        Transaction parameters to use when sending the ``ApplicationUpdateTxn`` into the Algorand network.
 
     Returns
     -------
     None
     """
-    # Use the values in `ProgramsStore` if the programs are set to `None`
-    approval_compiled = approval_compiled or ProgramsStore.approval_compiled
-    clear_compiled = clear_compiled or ProgramsStore.clear_compiled
-
     txn = transaction.ApplicationUpdateTxn(
         owner.address, params, app_id, approval_compiled, clear_compiled
     )

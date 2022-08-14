@@ -35,7 +35,7 @@ class _ProgramsStore:
         name: str,
         approval_program: PyTEAL,
         clear_program: PyTEAL,
-        mode: Mode,
+        mode: Mode,  # TODO: Isn't this parameter always going to be Mode.Application?
         version: int,
         local_ints: int,
         local_bytes: int,
