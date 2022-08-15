@@ -78,17 +78,6 @@ def call_sandbox_command(*args: str) -> subprocess.CompletedProcess:
 
 
 ## TRANSACTIONS
-def process_logic_sig_transaction(logic_sig: Any, payment_transaction: Any) -> Any:
-    """Create logic signature transaction and send it to the network."""
-    # TODO: Typing and general behavior
-
-    client = _algod_client()
-    logic_sig_transaction = LogicSigTransaction(payment_transaction, logic_sig)
-    transaction_id = client.send_transaction(logic_sig_transaction)
-    wait_for_confirmation(client, transaction_id, 4)
-    return transaction_id
-
-
 def process_transactions(transactions: list[transaction.Transaction]) -> int:
     """Send provided grouped `transactions` to network and wait for confirmation."""
     client = _algod_client()

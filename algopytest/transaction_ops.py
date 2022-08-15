@@ -6,13 +6,13 @@ from algosdk.future import transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
-from .program_store import ProgramsStore
 from .type_stubs import PyTEAL
 
 
 def transaction_boilerplate(
     no_log: bool = False,
     no_params: bool = False,
+    no_send: bool = False,
     no_sign: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
@@ -51,20 +51,24 @@ def transaction_boilerplate(
             # Create unsigned transaction
             signer, txn = func(*args, **kwargs)
 
-            # Return the `signer` and `txn` if no signing was requested
-            if decorator_args.get("__no_sign", no_sign):
+            # Return the `signer` and `txn` if no sending was requested
+            if decorator_args.get("__no_send", no_send):
                 return signer, txn
 
-            # Sign the transaction
-            signed_output = txn.sign(signer.private_key)
+            if decorator_args.get("__no_sign", no_sign):
+                # Send the `txn` as is
+                output_to_send = txn
+            else:
+                # Sign the `txn`
+                output_to_send = txn.sign(signer.private_key)
 
-            # If the `signed_output` is not a list, wrap it
+            # If the `output_to_send` is not a list, wrap it
             # in one as a singular transaction to be sent
-            if type(signed_output) is not list:
-                signed_output = [signed_output]
+            if type(output_to_send) is not list:
+                output_to_send = [output_to_send]
 
             # Send the transaction and await for confirmation
-            tx_id = process_transactions(signed_output)
+            tx_id = process_transactions(output_to_send)
 
             # Display results
             transaction_response = pending_transaction_info(tx_id)
@@ -92,7 +96,7 @@ def transaction_boilerplate(
     format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
     return_fn=lambda txinfo: txinfo["application-index"],
 )
-def create_custom_app(
+def create_app(
     owner: AlgoUser,
     approval_compiled: bytes,
     clear_compiled: bytes,
@@ -137,35 +141,6 @@ def create_custom_app(
     )
 
     return owner, txn
-
-
-def create_app(app_name: str, owner: AlgoUser) -> int:
-    """Deploy the smart contract from the details supplied during initialization of `AlgoPytest`.
-
-    Parameters
-    ----------
-    app_name
-        The name of the smart contract from registration with AlgoPytest.
-    owner
-        The user who will be the creator and owner of the smart contract.
-
-    Returns
-    -------
-    int
-        The application ID of the deployed smart contract.
-    """
-    if app_name not in ProgramsStore.programs:
-        raise ValueError(f"No smart contract registered with name: {app_name}")
-
-    smart_contract = ProgramsStore.programs[app_name]
-
-    return create_custom_app(
-        owner,
-        smart_contract.approval_compiled,
-        smart_contract.clear_compiled,
-        smart_contract.global_schema,
-        smart_contract.local_schema,
-    )
 
 
 # Returns `None` because of the `transaction_boilerplate` decorator
@@ -346,7 +321,6 @@ def call_app(
         app_args,
         accounts,
     )
-
     return sender, txn
 
 
@@ -389,18 +363,30 @@ def payment_transaction(
         note=note.encode(),
         close_remainder_to=close_remainder_to.address,
     )
-
     return sender, txn
 
 
+@transaction_boilerplate(
+    no_sign=True,
+)
+def smart_signature_transaction(
+    smart_signature: bytes,
+    transaction: transaction.Transaction,
+    params: Optional[transaction.SuggestedParams],
+) -> tuple[AlgoUser, transaction.Transaction]:
+    """Write docs here: TODO!"""
+    txn = transaction.LogicSigTransaction(transaction, smart_signature)
+    return NullUser, txn
+
+
 def group_elem(txn_factory: Callable) -> Callable:
-    def no_sign_factory(
+    def no_send_factory(
         *args: Any, **kwargs: Any
     ) -> tuple[AlgoUser, transaction.Transaction]:
         # Disable signing and logging within the `txn_factory`
-        return txn_factory(*args, __no_sign=True, __no_log=True, **kwargs)
+        return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
 
-    return no_sign_factory
+    return no_send_factory
 
 
 class _GroupTxn:

@@ -4,10 +4,12 @@ from __future__ import annotations
 from typing import Callable, Generator
 
 import pytest
+from algosdk.future import transaction
+from pyteal import Mode
 
 from .account_ops import add_standalone_account, defund_account
+from .client_ops import compile_program
 from .entities import AlgoUser
-from .program_store import ProgramsStore
 from .transaction_ops import create_app, delete_app
 from .type_stubs import YieldFixture
 
@@ -142,46 +144,3 @@ def create_user() -> YieldFixture[Callable]:
     # Clean up by de-funding all of the `created_users`
     for user in created_users:
         defund_account(user)
-
-
-@pytest.fixture()
-def smart_contract_id(owner: AlgoUser) -> YieldFixture[int]:
-    """The application ID of the smart contract registered with `AlgoPytest`.
-
-    This fixture only works if a single smart contract was registered with `AlgoPytest`. It will
-    raise an exception if more than one was registered since it does not know which to return.
-    In which case, use the fixture `smart_contract_id_by_name` to retrieve a specific smart contract.
-
-    This fixture automatically deploys the smart contract and yields the resulting application ID.
-    After the respective test is over, this fixture then cleans up after itself and deletes
-    the smart contract application.
-
-    Example
-    -------
-    .. code-block:: python
-
-        def test_update_from_owner(owner, smart_contract_id):
-            update_app(owner, smart_contract_id)
-
-    Parameters
-    ----------
-    owner
-       All this means is that this fixture depends on the ``owner`` fixture. Use this fixture as an ``int`` variable.
-
-    Yields
-    ------
-    int
-    """
-    if len(ProgramsStore.programs) != 1:
-        raise ValueError(
-            "The fixture `smart_contract_id` is only available if a single smart contract has been registered with AlgoPytest."
-        )
-
-    program_name = next(iter(ProgramsStore.programs.keys()))
-    app_id = create_app(program_name, owner)
-
-    # This is where the testing happens
-    yield app_id
-
-    # Clean up the smart contract
-    delete_app(owner, app_id)

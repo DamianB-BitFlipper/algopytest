@@ -31,30 +31,30 @@ from .client_ops import (
     compile_program,
     suggested_params,
 )
-from .program_store import register_smart_contract
+from .smart_program_ops import deploy_smart_contract
 from .transaction_ops import (
     call_app,
     clear_app,
     close_out_app,
     create_app,
-    create_custom_app,
     delete_app,
     group_elem,
     group_transaction,
     opt_in_app,
     payment_transaction,
+    smart_signature_transaction,
     update_app,
 )
 
 # The functions to expose for sphinx documentation
 __all__ = [
+    "deploy_smart_contract",
     "account_balance",
     "application_global_state",
     "application_local_state",
     "compile_program",
     "suggested_params",
     "create_app",
-    "create_custom_app",
     "delete_app",
     "update_app",
     "opt_in_app",
@@ -62,7 +62,7 @@ __all__ = [
     "clear_app",
     "call_app",
     "payment_transaction",
+    "smart_signature_transaction",
     "group_elem",
     "group_transaction",
-    "register_smart_contract",
 ]
