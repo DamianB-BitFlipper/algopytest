@@ -1,5 +1,7 @@
-from typing import Callable, Tuple
+from types import TracebackType
+from typing import Callable, Optional, Tuple, Type
 
+import typing_extensions
 from algosdk.future import transaction
 from pyteal import Mode
 
@@ -14,11 +16,17 @@ class DeployedSmartContract:
         self.owner = owner
         self.app_id = app_id
 
-    def __enter__(self):
+    def __enter__(self) -> int:
         return self.app_id
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> typing_extensions.Literal[False]:
         delete_app(self.owner, self.app_id)
+        return False
 
 
 def deploy_smart_contract(

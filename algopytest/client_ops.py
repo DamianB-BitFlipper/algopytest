@@ -18,12 +18,7 @@ from algosdk import mnemonic
 from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
 from algosdk.future import transaction
-from algosdk.future.transaction import (
-    LogicSig,
-    LogicSigTransaction,
-    PaymentTxn,
-    wait_for_confirmation,
-)
+from algosdk.future.transaction import LogicSig, PaymentTxn, wait_for_confirmation
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
@@ -245,9 +240,7 @@ def _compile_source(source: str) -> bytes:
     return base64.b64decode(compile_response["result"])
 
 
-def compile_program(
-    program: PyTEAL, mode: Mode = Mode.Application, version: int = 5
-) -> bytes:
+def compile_program(program: PyTEAL, mode: Mode, version: int = 5) -> bytes:
     """Compiles a PyTEAL smart contract program to the TEAL binary code.
 
     Parameters

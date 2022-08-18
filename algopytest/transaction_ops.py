@@ -330,9 +330,12 @@ def payment_transaction(
     sender: AlgoUser,
     receiver: AlgoUser,
     amount: int,
+    *,
     params: Optional[transaction.SuggestedParams],
-    note: str = "",
     close_remainder_to: AlgoUser = NullUser,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> tuple[AlgoUser, transaction.Transaction]:
     """Perform an Algorand payment transaction.
 
@@ -346,10 +349,15 @@ def payment_transaction(
         The amount of microAlgos (10e-6 Algos) to transact.
     params
         Transaction parameters to use when sending the ``PaymentTxn`` into the Algorand network.
-    note
-        A note to attach along with the payment transaction.
     close_remainder_to
         An Algorand address to close any remainder to.
+    note
+        A note to attach along with the payment transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -360,8 +368,10 @@ def payment_transaction(
         params,
         receiver.address,
         amount,
-        note=note.encode(),
         close_remainder_to=close_remainder_to.address,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
     )
     return sender, txn
 
@@ -371,12 +381,12 @@ def payment_transaction(
 )
 def smart_signature_transaction(
     smart_signature: bytes,
-    transaction: transaction.Transaction,
+    txn: transaction.Transaction,
     params: Optional[transaction.SuggestedParams],
 ) -> tuple[AlgoUser, transaction.Transaction]:
     """Write docs here: TODO!"""
-    txn = transaction.LogicSigTransaction(transaction, smart_signature)
-    return NullUser, txn
+    logic_txn = transaction.LogicSigTransaction(txn, smart_signature)
+    return NullUser, logic_txn
 
 
 def group_elem(txn_factory: Callable) -> Callable:
