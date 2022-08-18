@@ -1,3 +1,6 @@
 [submodule "demo/algo-diploma"]
 	path = demos/algo-diploma
 	url = https://github.com/DamianB-BitFlipper/algo-diploma.git
+[submodule "demos/algo-recurring-payments"]
+	path = demos/algo-recurring-payments
+	url = git@github.com:DamianB-BitFlipper/algo-recurring-payments.git
