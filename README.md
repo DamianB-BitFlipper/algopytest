@@ -27,10 +27,10 @@ pip install algopytest-framework
 ```
 
 ## Simplified Usage
-Make sure the sandbox is up and running. Preferably use a local network for your testing. Note: There is currently an issue with the `dev` sandbox which makes it work not too well with *AlgoPytest*. Networks `release` and `nightly` are more recommended.
+Make sure the sandbox is up and running. Preferably use a local network for your testing such as `dev`.
 ```bash
-# Spin up the `release` network
-./sandbox up release
+# Spin up the `dev` network
+./sandbox up dev
 ```
 ---
 Set any necessary environment variables. 
