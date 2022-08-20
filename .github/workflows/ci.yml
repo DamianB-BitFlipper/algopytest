@@ -23,6 +23,9 @@ jobs:
           activate-environment: algopytest
           environment-file: ./environment.yml
           python-version: ${{ matrix.python-version }}        
+        run: |
+          conda info
+          conda list
 
       - name: Clone Algorand Sanbox
         run: cd .. && git clone https://github.com/algorand/sandbox.git
