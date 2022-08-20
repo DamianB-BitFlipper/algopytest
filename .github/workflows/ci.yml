@@ -17,15 +17,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup conda
-        uses: s-weigand/setup-conda@v1
+      - uses: conda-incubator/setup-miniconda@v2
         with:
-          update-conda: true
-          python-version: ${{ matrix.python-version }}
-          conda-channels: anaconda, conda-forge
+          auto-update-conda: true
+          auto-activate-base: true
+          activate-environment: ""          
+          python-version: ${{ matrix.python-version }}        
 
       - name: Install package dependencies
-        run: conda env update
+        run: conda env update -n base
 
       - name: Clone Algorand Sanbox
         run: cd .. && git clone https://github.com/algorand/sandbox.git
