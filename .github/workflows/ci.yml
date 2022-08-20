@@ -31,6 +31,8 @@ jobs:
       - name: Install package dependencies
         run: |
           conda env create
+          conda init bash
+          source ~/.bashrc
           conda activate algopytest
 
       - name: Clone Algorand Sanbox
