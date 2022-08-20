@@ -1,0 +1,26 @@
+name: AlgoPytest Integration Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  run-integration-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [ "3.8", "3.9", "3.10" ]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "${{ matrix.python }}"
+      - name: Test Python version
+        run: |
+          installed="$(python --version)"
+          expected="${{ matrix.python }}"
+          echo $installed
+          [[ $installed =~ "Python ${expected}" ]] && echo "Configured Python" || (echo "Failed to configure Python" && exit 1)
