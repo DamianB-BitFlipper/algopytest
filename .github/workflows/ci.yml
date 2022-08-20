@@ -28,16 +28,6 @@ jobs:
           echo $installed
           [[ $installed =~ "Python ${expected}" ]] && echo "Configured Python" || (echo "Failed to configure Python" && exit 1)
           
-      - name: Clone Algorand Sanbox
-        run: cd .. && git clone https://github.com/algorand/sandbox.git
-        
-      - name: Run Algorand Sandbox
-        shell: 'script -q -e -c "bash {0}"' # hacky hack to make TTY work
-        run: cd ../sandbox && ./sandbox up dev -v
-
-      - name: Test Algo-Recurring-Payments Unittests
+      - name: Test conde
         run: |
-          # Set the necessary environment variables for AlgoPytest
-          export SANDBOX_DIR=$(pwd)/../sandbox
-          export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
-          export PYTHON_PATH=$(pwd)/demos/algo-recurring-payments/assets
+          conda -V
