@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.8", "3.9", "3.10" ]
+        python: [ "3.8", "3.9", "3.10" ]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -40,4 +40,4 @@ jobs:
           export SANDBOX_DIR=$(pwd)/../sandbox
           export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
           export PYTHON_PATH=$(pwd)/demos/algo-recurring-payments/assets
-          conda run -n algopytest pytest ./demos/algo-recurring-payments/ -vx
+          pytest ./demos/algo-recurring-payments/ -vx
