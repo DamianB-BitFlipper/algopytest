@@ -1,0 +1,12 @@
+pip
+pre-commit
+pyteal
+pytest
+python
+py-algorand-sdk
+setuptools
+sphinx
+m2r2
+sphinx_rtd_theme
+twine
+typing_extensions
