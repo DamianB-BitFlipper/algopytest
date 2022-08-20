@@ -36,7 +36,7 @@ jobs:
         run: cd ../sandbox && ./sandbox up dev -v
 
       - name: Test Algo-Recurring-Payments
-      - run |
+      - run: |
           export SANDBOX_DIR=$(pwd)/../sandbox
           export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
           export PYTHON_PATH=$(pwd)/demos/algo-recurring-payments/assets
