@@ -19,17 +19,18 @@ jobs:
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-update-conda: true
           activate-environment: algopytest
           environment-file: ./environment.yml
-          python-version: ${{ matrix.python-version }}        
+          python-version: ${{ matrix.python-version }}
+          auto-activate-base: false
+          auto-update-conda: true          
 
       - name: List conda information
         run: |
           conda info
           conda list
 
-      - name: Clone Algorand Sanbox
+      - name: Clone Algorand Sandbox
         run: cd .. && git clone https://github.com/algorand/sandbox.git
         
       - name: Run Algorand Sandbox
