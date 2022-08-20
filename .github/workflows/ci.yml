@@ -23,6 +23,8 @@ jobs:
           activate-environment: algopytest
           environment-file: ./environment.yml
           python-version: ${{ matrix.python-version }}        
+
+      - name: List conda information
         run: |
           conda info
           conda list
