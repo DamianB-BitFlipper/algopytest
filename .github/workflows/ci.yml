@@ -25,7 +25,7 @@ jobs:
           conda-channels: anaconda, conda-forge
 
       - name: Install package dependencies
-        run: conda env create && conda activate algopytest
+        run: conda env update
 
       - name: Clone Algorand Sanbox
         run: cd .. && git clone https://github.com/algorand/sandbox.git

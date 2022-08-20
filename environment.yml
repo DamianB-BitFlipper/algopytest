@@ -3,16 +3,16 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - pip=21.3.1
-  - pre-commit=2.17.0
-  - pytest=7.0.0
-  - python=3.10.2
-  - setuptools=60.5.0
-  - sphinx=4.4.0
-  - m2r2=0.3.2
-  - sphinx_rtd_theme=1.0.0
-  - twine=3.8.0
+  - pip
+  - pre-commit
+  - pytest
+  - python
+  - setuptools
+  - sphinx
+  - m2r2
+  - sphinx_rtd_theme
+  - twine
   - typing_extensions
   - pip:
-    - py-algorand-sdk==1.9.0
-    - pyteal==0.9.1
+    - py-algorand-sdk
+    - pyteal
