@@ -27,13 +27,6 @@ jobs:
           expected="${{ matrix.python }}"
           echo $installed
           [[ $installed =~ "Python ${expected}" ]] && echo "Configured Python" || (echo "Failed to configure Python" && exit 1)
-          
-      - name: Clone Algorand Sanbox
-        run: cd .. && git clone https://github.com/algorand/sandbox.git
-        
-      - name: Run Algorand Sandbox
-        shell: 'script -q -e -c "bash {0}"' # hacky hack to make TTY work
-        run: cd ../sandbox && ./sandbox up dev -v
 
       - name: Test Algo-Recurring-Payments Unittests
       - run: echo "LOL"
