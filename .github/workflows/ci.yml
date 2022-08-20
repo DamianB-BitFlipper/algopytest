@@ -10,30 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: [ "3.8", "3.9", "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10" ]
     steps:
       - name: Check out code
         uses: actions/checkout@v2
         with:
           submodules: recursive
-          
-      - uses: actions/setup-python@v3
+
+      - name: Setup conda
+        uses: s-weigand/setup-conda@v1
         with:
-          python-version: "${{ matrix.python }}"
-          
-      - name: Test Python version
-        run: |
-          installed="$(python --version)"
-          expected="${{ matrix.python }}"
-          echo $installed
-          [[ $installed =~ "Python ${expected}" ]] && echo "Configured Python" || (echo "Failed to configure Python" && exit 1)
+          update-conda: true
+          python-version: ${{ matrix.python-version }}
+          conda-channels: anaconda, conda-forge
 
       - name: Install package dependencies
-        run: |
-          conda env create
-          conda init bash
-          source /home/runner/.bashrc
-          conda activate algopytest
+        run: conda env create && conda activate algopytest
 
       - name: Clone Algorand Sanbox
         run: cd .. && git clone https://github.com/algorand/sandbox.git
@@ -48,4 +40,4 @@ jobs:
           export SANDBOX_DIR=$(pwd)/../sandbox
           export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
           export PYTHON_PATH=$(pwd)/demos/algo-recurring-payments/assets
-          pytest ./demos/algo-recurring-payments/ -vx
+          conda run -n algopytest pytest ./demos/algo-recurring-payments/ -vx
