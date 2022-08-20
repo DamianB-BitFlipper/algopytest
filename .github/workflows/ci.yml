@@ -37,10 +37,10 @@ jobs:
 
       - name: Test Algo-Recurring-Payments Unittests
         run: |
+          echo $(pwd)        
           export SANDBOX_DIR=$(pwd)/../sandbox
           export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
           export PYTHON_PATH=$(pwd)/demos/algo-recurring-payments/assets
-          echo $(pwd)
           echo $SANDBOX_DIR
           echo $INITIAL_FUNDS_ACCOUNT
           echo $PYTHON_PATH
