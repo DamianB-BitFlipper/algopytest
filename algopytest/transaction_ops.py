@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, Optional, Tuple
 
 from algosdk import account
 from algosdk.future import transaction
@@ -103,7 +103,7 @@ def create_app(
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
     params: Optional[transaction.SuggestedParams],
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
 
     Parameters
@@ -149,7 +149,7 @@ def create_app(
 )
 def delete_app(
     owner: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Delete a deployed smart contract.
 
     Parameters
@@ -179,7 +179,7 @@ def update_app(
     approval_compiled: bytes,
     clear_compiled: bytes,
     params: Optional[transaction.SuggestedParams],
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Update a deployed smart contract.
 
     Parameters
@@ -212,7 +212,7 @@ def update_app(
 )
 def opt_in_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
     Parameters
@@ -238,7 +238,7 @@ def opt_in_app(
 )
 def close_out_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Close-out from a deployed smart contract.
 
     Parameters
@@ -264,7 +264,7 @@ def close_out_app(
 )
 def clear_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Clear from a deployed smart contract.
 
     Parameters
@@ -292,9 +292,9 @@ def call_app(
     sender: AlgoUser,
     app_id: int,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-) -> tuple[AlgoUser, transaction.Transaction]:
+    app_args: Optional[List[str]] = None,
+    accounts: Optional[List[str]] = None,
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Perform an application call to a deployed smart contract.
 
     Parameters
@@ -336,7 +336,7 @@ def payment_transaction(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Perform an Algorand payment transaction.
 
     Parameters
@@ -383,7 +383,7 @@ def smart_signature_transaction(
     smart_signature: bytes,
     txn: transaction.Transaction,
     params: Optional[transaction.SuggestedParams],
-) -> tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.Transaction]:
     """Write docs here: TODO!"""
     logic_txn = transaction.LogicSigTransaction(txn, smart_signature)
     return NullUser, logic_txn
@@ -392,7 +392,7 @@ def smart_signature_transaction(
 def group_elem(txn_factory: Callable) -> Callable:
     def no_send_factory(
         *args: Any, **kwargs: Any
-    ) -> tuple[AlgoUser, transaction.Transaction]:
+    ) -> Tuple[AlgoUser, transaction.Transaction]:
         # Disable signing and logging within the `txn_factory`
         return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
 
@@ -400,7 +400,7 @@ def group_elem(txn_factory: Callable) -> Callable:
 
 
 class _GroupTxn:
-    def __init__(self, transactions: list[tuple[AlgoUser, transaction.Transaction]]):
+    def __init__(self, transactions: List[Tuple[AlgoUser, transaction.Transaction]]):
         # Separate out the `signers` and the `txns`
         signers = [signer for signer, _ in transactions]
         txns = [txn for _, txn in transactions]
@@ -409,7 +409,7 @@ class _GroupTxn:
         self.signers = signers
         self.txns = transaction.assign_group_id(txns)
 
-    def sign(self, _: str) -> list[transaction.SignedTransaction]:
+    def sign(self, _: str) -> List[transaction.SignedTransaction]:
         # Sign all of the transactions
         signed_txns = []
         for signer, txn in zip(self.signers, self.txns):
@@ -422,8 +422,8 @@ class _GroupTxn:
     no_params=True,
 )
 def group_transaction(
-    *transactions: tuple[AlgoUser, transaction.Transaction],
-) -> tuple[AlgoUser, _GroupTxn]:
+    *transactions: Tuple[AlgoUser, transaction.Transaction],
+) -> Tuple[AlgoUser, _GroupTxn]:
     # The signers are already included as the first elements
     # of the tuples in `transactions`, so return the `NullUser`
     # as the signer of this group transaction

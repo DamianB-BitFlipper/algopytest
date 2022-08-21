@@ -1,4 +1,4 @@
-# Change Log
+# CHANGELOG
 
 ## [Unreleased] - yyyy-mm-dd
 
