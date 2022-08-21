@@ -42,12 +42,21 @@ jobs:
         
       - name: Run Algorand Sandbox
         shell: 'script -q -e -c "bash {0}"' # hacky hack to make TTY work
-        run: cd ../sandbox && ./sandbox up dev -v
+        run: |
+          cd ../sandbox
+          ./sandbox up dev -v
+          # Set the necessary environment variables for AlgoPytest
+          export SANDBOX_DIR=$(pwd)/../sandbox
+          export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)          
 
       - name: Test Algo-Recurring-Payments Unittests
         run: |
-          # Set the necessary environment variables for AlgoPytest
-          export SANDBOX_DIR=$(pwd)/../sandbox
-          export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
+          # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
           pytest ./demos/algo-recurring-payments/ -vx
+
+      - name: Test Algo-Diploma Unittests
+        run: |
+          # So that algo-diploma can be imported by the tests
+          export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
+          pytest ./demos/algo-diploma/ -vx
