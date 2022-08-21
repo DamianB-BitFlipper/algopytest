@@ -1,0 +1,91 @@
+FILETYPE: Python; .py
+algod
+algosdk
+functools
+openpty
+pathlib
+pyteal
+pytest
+txninfo
+txns
+
+FILETYPE: Markdown; .md
+algod
+changelog
+codecov
+conda
+conftest
+mdash
+pytest
+pythonpath
+readthedocs
+yyyy
+
+FILEID: 50d19eb2-217c-11ed-bf4b-e4b318472d90
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+FILEID: ada294b6-217c-11ed-9d3f-e4b318472d90
+apid
+
+FILEID: b9d85dc4-217c-11ed-b545-e4b318472d90
+ipaleka
+
+FILEID: b1beb24e-2183-11ed-9deb-e4b318472d90
+algopytest
+bjan
+cfprjzoozc
+dpipgcpbqiutxl
+goodpractices
+hookspec
+ndmzjwu
+pyteal
+
+FILEID: f4764254-2184-11ed-aa51-e4b318472d90
+ipaleka
+
+FILEID: fb59cdc0-2184-11ed-8e52-e4b318472d90
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+FILEID: 05df82f8-2185-11ed-bb27-e4b318472d90
+apid
+
+FILEID: 57462714-2185-11ed-a1be-e4b318472d90
+autodoc
+autosummary
+bysource
+docstring
+google
+typehints
+viewcode
+
+FILEID: 67f25772-2185-11ed-b830-e4b318472d90
+algopytest
+damianb
+setuptools
+
+NATURAL:
+algorand
+algos
+apps
+barabonkov
+blockchain
+codebase
+damian
+dataclasses
+defund
+defunding
+github
+https
+ints
+localhost
+noninfringement
+passphrase
+plugin
+plugins
+rekey
+stateful
+sublicense
+todo
+traceback
+tuples
+

@@ -16,3 +16,4 @@ dependencies:
   - pip:
     - py-algorand-sdk
     - pyteal
+    - scspell3k
