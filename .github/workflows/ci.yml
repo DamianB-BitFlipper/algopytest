@@ -6,6 +6,12 @@ on:
   pull_request:
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.0
   run-integration-tests:
     defaults:
       run:
@@ -16,18 +22,22 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Checkout the code
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Setup conda and install dependencies
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: algopytest
           environment-file: ./environment.yml
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
           auto-update-conda: true          
+
+      - name: Install additional dependencies related to CI
+        run: conda install pytest-cov
 
       - name: Install AlgoPytest
         run: pip install .
@@ -42,12 +52,24 @@ jobs:
         
       - name: Run Algorand Sandbox
         shell: 'script -q -e -c "bash {0}"' # hacky hack to make TTY work
-        run: cd ../sandbox && ./sandbox up dev -v
+        run: |
+          cd ../sandbox
+          ./sandbox up dev -v
+          # Set the necessary environment variables for AlgoPytest
+          export SANDBOX_DIR=$(pwd)/../sandbox
+          export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)          
 
       - name: Test Algo-Recurring-Payments Unittests
         run: |
-          # Set the necessary environment variables for AlgoPytest
-          export SANDBOX_DIR=$(pwd)/../sandbox
-          export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)
+          # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          pytest ./demos/algo-recurring-payments/ -vx
+          pytest ./demos/algo-recurring-payments/ -vx --cov=. --cov-report xml
+
+      - name: Test Algo-Diploma Unittests
+        run: |
+          # So that algo-diploma can be imported by the tests
+          export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
+          pytest ./demos/algo-diploma/ -vx --cov=. --cov-append --cov-report xml
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
