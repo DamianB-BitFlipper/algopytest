@@ -36,13 +36,6 @@ jobs:
           conda info
           conda list
 
-      - name: Clone Algorand Sandbox
-        run: cd .. && git clone https://github.com/algorand/sandbox.git
-        
-      - name: Run Algorand Sandbox
-        shell: 'script -q -e -c "bash {0}"' # hacky hack to make TTY work
-        run: cd ../sandbox && ./sandbox up dev -v
-
       - name: Test Algo-Recurring-Payments Unittests
         run: |
           # Set the necessary environment variables for AlgoPytest
