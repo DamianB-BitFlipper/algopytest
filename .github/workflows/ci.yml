@@ -28,6 +28,9 @@ jobs:
           auto-activate-base: false
           auto-update-conda: true          
 
+      - name: Install AlgoPytest
+        run: pip install .
+          
       - name: List conda information
         run: |
           conda info
