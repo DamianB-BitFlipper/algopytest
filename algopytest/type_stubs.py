@@ -4,10 +4,9 @@ import pyteal
 
 from .entities import AlgoUser
 
-# Alias the type for a PyTEAL program
+# Type for a PyTEAL program
 PyTEAL = Callable[[], pyteal.Expr]
 
-# Typable type aliases
+# Type for PyTest fixtures which yield a fixture themselves
 T = TypeVar("T")
-
 YieldFixture = Generator[T, None, None]

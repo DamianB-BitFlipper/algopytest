@@ -22,3 +22,10 @@ repos:
     rev: v0.931  # Use the sha / tag you want to point at
     hooks:
     - id: mypy
+-   repo: local
+    hooks:
+    - id: spellcheck
+      name: spellcheck
+      entry: ./.spellcheck.sh
+      language: system
+      types_or: [python, markdown]

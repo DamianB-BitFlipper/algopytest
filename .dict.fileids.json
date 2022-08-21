@@ -1,0 +1,20 @@
+{
+  "b1beb24e-2183-11ed-9deb-e4b318472d90": [
+    "README.md"
+  ],
+  "f4764254-2184-11ed-aa51-e4b318472d90": [
+    "algopytest/client_ops.py"
+  ],
+  "fb59cdc0-2184-11ed-8e52-e4b318472d90": [
+    "algopytest/config_params.py"
+  ],
+  "05df82f8-2185-11ed-bb27-e4b318472d90": [
+    "algopytest/transaction_ops.py"
+  ],
+  "57462714-2185-11ed-a1be-e4b318472d90": [
+    "docs/source/conf.py"
+  ],
+  "67f25772-2185-11ed-b830-e4b318472d90": [
+    "setup.py"
+  ]
+}
