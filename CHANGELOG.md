@@ -5,15 +5,19 @@
 Here we write upgrading notes for brands. It's a team effort to make them as
 straightforward as possible.
 
-### Added
+### New Features
 - Function `application_local_state` to read the local state of an account relating to a deployed application
 - Function `group_transaction` to send group transactions
+- Removed `ProgramStore` class and replaced it with `deploy_smart_contract` which the user would call directly in a user-defined fixture to retrieve the smart contract app ID for testing
+
+### Bug Fixes
+- Removed type subscripting to be compatible with Python 3.8
 
 ## [1.0.0] - 2022-02-09
 
 The first release of AlgoPytest. Includes many functions to write usable tests as well as a good foundation to expand this library
 
-### Added
+### New Features
 - File `account_ops.py` includes functions which facilitate the creation, funding and defunding of an Algorand User within this framework
 - File `client_ops.py` includes all sorts of functions which ultimately interact with either algod or the indexer. Functions include sending transaction, reading the applications' global state, compiling PyTEAL source, etc.
 - File `config_params.py` holds a class `_ConfigParams` for reading environment variables to configure AlgoPytest
