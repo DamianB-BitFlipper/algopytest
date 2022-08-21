@@ -93,8 +93,8 @@ def transaction_boilerplate(
 
 # The return type is `int` modified by `return_fn`
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["application-index"]}',
-    return_fn=lambda txinfo: txinfo["application-index"],
+    format_finish=lambda txninfo: f'app-id={txninfo["application-index"]}',
+    return_fn=lambda txninfo: txninfo["application-index"],
 )
 def create_app(
     owner: AlgoUser,
@@ -145,7 +145,7 @@ def create_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def delete_app(
     owner: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
@@ -171,7 +171,7 @@ def delete_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def update_app(
     owner: AlgoUser,
@@ -208,7 +208,7 @@ def update_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def opt_in_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
@@ -234,7 +234,7 @@ def opt_in_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def close_out_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
@@ -260,7 +260,7 @@ def close_out_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def clear_app(
     sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
@@ -286,7 +286,7 @@ def clear_app(
 
 # Returns `None` because of the `transaction_boilerplate` decorator
 @transaction_boilerplate(
-    format_finish=lambda txinfo: f'app-id={txinfo["txn"]["txn"]["apid"]}',
+    format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def call_app(
     sender: AlgoUser,
