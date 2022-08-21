@@ -1,6 +1,10 @@
 # Sphinx files
 docs/build
 
+# Coverage reports
+.coverage
+htmlcov
+
 # Python side-effects
 build
 dist

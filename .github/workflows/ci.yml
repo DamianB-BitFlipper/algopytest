@@ -16,18 +16,22 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      - name: Checkout the code
         uses: actions/checkout@v2
         with:
           submodules: recursive
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Setup conda and install dependencies
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: algopytest
           environment-file: ./environment.yml
           python-version: ${{ matrix.python-version }}
           auto-activate-base: false
           auto-update-conda: true          
+
+      - name: Install additional dependencies related to CI
+        run: conda install pytest-cov
 
       - name: Install AlgoPytest
         run: pip install .
@@ -53,10 +57,13 @@ jobs:
         run: |
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          pytest ./demos/algo-recurring-payments/ -vx
+          pytest ./demos/algo-recurring-payments/ -vx --cov=.
 
       - name: Test Algo-Diploma Unittests
         run: |
           # So that algo-diploma can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
-          pytest ./demos/algo-diploma/ -vx
+          pytest ./demos/algo-diploma/ -vx --cov=. --cov-append
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
