@@ -1,5 +1,5 @@
 # AlgoPytest &mdash; Framework for Testing Algorand Smart Contracts using PyTest
-[![codecov](https://codecov.io/github/codecov/example-python/branch/main/graph/badge.svg?token=tkq655ROg3)](https://app.codecov.io/github/codecov/example-python)
+[![codecov](https://codecov.io/gh/DamianB-BitFlipper/algopytest/branch/master/graph/badge.svg?token=0O7EP3YOB0)](https://codecov.io/gh/DamianB-BitFlipper/algopytest)
 
 *AlgoPytest* is a Pytest plugin framework which hides away all of the complexity and repetitiveness that comes with testing Algorand Smart Contracts. 
 
