@@ -42,7 +42,8 @@ jobs:
         run: conda install pytest-cov
 
       - name: Install AlgoPytest
-        run: pip install .
+        # Editable install so that pytest code coverage can find the local library files
+        run: pip install -e .
           
       - name: List conda information
         run: |
