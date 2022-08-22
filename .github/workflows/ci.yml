@@ -42,7 +42,7 @@ jobs:
         run: conda install pytest-cov
 
       - name: Install AlgoPytest
-        run: pip install .
+        run: pip install -e .
           
       - name: List conda information
         run: |
