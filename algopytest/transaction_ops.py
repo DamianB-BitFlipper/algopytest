@@ -428,3 +428,7 @@ def group_transaction(
     # of the tuples in `transactions`, so return the `NullUser`
     # as the signer of this group transaction
     return NullUser, _GroupTxn(list(transactions))
+
+
+def dummy_function() -> int:
+    return 69

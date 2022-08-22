@@ -38,6 +38,7 @@ from .transaction_ops import (
     close_out_app,
     create_app,
     delete_app,
+    dummy_function,
     group_elem,
     group_transaction,
     opt_in_app,
@@ -48,6 +49,7 @@ from .transaction_ops import (
 
 # The functions to expose for sphinx documentation
 __all__ = [
+    "dummy_function",
     "deploy_smart_contract",
     "account_balance",
     "application_global_state",
