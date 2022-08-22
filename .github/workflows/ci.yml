@@ -65,7 +65,7 @@ jobs:
         run: |
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          pytest ./demos/algo-recurring-payments/ -vx --cov=. --cov-report xml -k test_dummy_function
+          pytest ./demos/algo-recurring-payments/ -vx --cov=. -k test_dummy_function
 
 #      - name: Test Algo-Diploma Unittests
 #        run: |
