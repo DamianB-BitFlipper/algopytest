@@ -113,7 +113,7 @@ def _wait_for_indexer(func: Callable) -> Callable:
         while _indexer_client().health()["round"] < algod_round:
             time.sleep(1)
 
-        # Give the indexer a number of tries before erroring out
+        # Give the indexer a number of tries before raising an error
         timeout = 0
         while timeout < ConfigParams.indexer_timeout:
             try:

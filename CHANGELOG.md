@@ -11,7 +11,7 @@ straightforward as possible.
 - Removed `ProgramStore` class and replaced it with `deploy_smart_contract` which the user would call directly in a user-defined fixture to retrieve the smart contract app ID for testing
 
 ### Bug Fixes
-- Removed type subscripting to be compatible with Python 3.8
+- Removed typing subscripts to be compatible with Python 3.8
 
 ## [1.0.0] - 2022-02-09
 

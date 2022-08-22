@@ -3,7 +3,7 @@ docs/build
 
 # Coverage reports
 .coverage
-coverage.xml
+coverage.*
 htmlcov
 
 # Python side-effects
