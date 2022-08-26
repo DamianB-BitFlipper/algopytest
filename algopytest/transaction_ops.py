@@ -400,32 +400,24 @@ def group_elem(txn_factory: Callable) -> Callable:
 
 
 class _GroupTxn:
-    def __init__(
-        self,
-        transactions: List[
-            Tuple[
-                AlgoUser,
-                Union[transaction.Transaction, transaction.LogicSigTransaction],
-            ]
-        ],
-    ):
+    _InputTxnType = Union[transaction.Transaction, transaction.LogicSigTransaction]
+    _SignedTxnType = Union[
+        transaction.SignedTransaction, transaction.LogicSigTransaction
+    ]
+
+    def __init__(self, transactions: List[Tuple[AlgoUser, _InputTxnType]]):
         # Separate out the `signers` and the `txns`
         self.signers = [signer for signer, _ in transactions]
         self.txns = [txn for _, txn in transactions]
 
         # Assign the group ID, flattening out `LogicSigTransaction` to get the underlying `Transaction`
-        transaction.assign_group_id(
-            [
-                txn.transaction
-                if isinstance(txn, transaction.LogicSigTransaction)
-                else txn
-                for txn in self.txns
-            ]
-        )
+        flattened_txns = [
+            txn.transaction if isinstance(txn, transaction.LogicSigTransaction) else txn
+            for txn in self.txns
+        ]
+        transaction.assign_group_id(flattened_txns)
 
-    def sign(
-        self, _: str
-    ) -> List[Union[transaction.SignedTransaction, transaction.LogicSigTransaction]]:
+    def sign(self, _: str) -> List[_SignedTxnType]:
         # Sign all of the transactions
         signed_txns = []
         for signer, txn in zip(self.signers, self.txns):
