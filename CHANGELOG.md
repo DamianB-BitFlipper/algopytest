@@ -9,6 +9,7 @@ straightforward as possible.
 - Function `application_local_state` to read the local state of an account relating to a deployed application
 - Function `group_transaction` to send group transactions
 - Removed `ProgramStore` class and replaced it with `deploy_smart_contract` which the user would call directly in a user-defined fixture to retrieve the smart contract app ID for testing
+- Implemented support for group transactions to hold both `Transaction` and `LogicSigTransaction`
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8

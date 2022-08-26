@@ -64,9 +64,17 @@ jobs:
 
       - name: Test Algo-Recurring-Payments Unittests
         run: |
+          # Unset the `INITIAL_FUNDS_ACCOUNT` to test the automatic account resolution
+          export _INITIAL_FUNDS_ACCOUNT=$INITIAL_FUNDS_ACCOUNT
+          unset INITIAL_FUNDS_ACCOUNT
+
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
           pytest ./demos/algo-recurring-payments/ -vx --color=yes --cov=. --cov-report xml
+
+          # Reset the `INITIAL_FUNDS_ACCOUNT`
+          export INITIAL_FUNDS_ACCOUNT=$_INITIAL_FUNDS_ACCOUNT
+          unset _INITIAL_FUNDS_ACCOUNT
 
       - name: Test Algo-Diploma Unittests
         run: |
