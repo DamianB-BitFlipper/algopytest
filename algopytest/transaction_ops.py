@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from algosdk import account
 from algosdk.future import transaction
@@ -400,20 +400,40 @@ def group_elem(txn_factory: Callable) -> Callable:
 
 
 class _GroupTxn:
-    def __init__(self, transactions: List[Tuple[AlgoUser, transaction.Transaction]]):
+    def __init__(
+        self,
+        transactions: List[
+            Tuple[
+                AlgoUser,
+                Union[transaction.Transaction, transaction.LogicSigTransaction],
+            ]
+        ],
+    ):
         # Separate out the `signers` and the `txns`
-        signers = [signer for signer, _ in transactions]
-        txns = [txn for _, txn in transactions]
+        self.signers = [signer for signer, _ in transactions]
+        self.txns = [txn for _, txn in transactions]
 
-        # Save the `signers` and `txns` with the group ID set
-        self.signers = signers
-        self.txns = transaction.assign_group_id(txns)
+        # Assign the group ID, flattening out `LogicSigTransaction` to get the underlying `Transaction`
+        transaction.assign_group_id(
+            [
+                txn.transaction
+                if isinstance(txn, transaction.LogicSigTransaction)
+                else txn
+                for txn in self.txns
+            ]
+        )
 
-    def sign(self, _: str) -> List[transaction.SignedTransaction]:
+    def sign(
+        self, _: str
+    ) -> List[Union[transaction.SignedTransaction, transaction.LogicSigTransaction]]:
         # Sign all of the transactions
         signed_txns = []
         for signer, txn in zip(self.signers, self.txns):
-            signed_txns.append(txn.sign(signer.private_key))
+            # Logic signature transactions simply get appended since they are already signed
+            if isinstance(txn, transaction.LogicSigTransaction):
+                signed_txns.append(txn)
+            else:
+                signed_txns.append(txn.sign(signer.private_key))
 
         return signed_txns
 
