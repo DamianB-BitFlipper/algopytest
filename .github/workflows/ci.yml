@@ -39,7 +39,7 @@ jobs:
           auto-update-conda: true          
 
       - name: Install additional dependencies related to CI
-        run: conda install pytest-cov
+        run: conda install coverage
 
       - name: Install AlgoPytest
         # Editable install so that pytest code coverage can find the local library files
@@ -70,7 +70,7 @@ jobs:
 
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          pytest ./demos/algo-recurring-payments/ -vx --color=yes --cov=. --cov-report xml
+          coverage run --source=algopytest -m pytest ./demos/algo-recurring-payments/ -vx --color=yes
 
           # Reset the `INITIAL_FUNDS_ACCOUNT`
           export INITIAL_FUNDS_ACCOUNT=$_INITIAL_FUNDS_ACCOUNT
@@ -80,7 +80,7 @@ jobs:
         run: |
           # So that algo-diploma can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
-          pytest ./demos/algo-diploma/ -vx --color=yes --cov=. --cov-append --cov-report xml
+          coverage run --append --source=algopytest -m pytest ./demos/algo-diploma/ -vx --color=yes
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
