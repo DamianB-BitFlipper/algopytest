@@ -102,7 +102,16 @@ def create_app(
     clear_compiled: bytes,
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
+    *,
     params: Optional[transaction.SuggestedParams],
+    app_args: Optional[list[str]] = None,
+    accounts: Optional[list[str]] = None,
+    foreign_apps: Optional[list[int]] = None,
+    foreign_assets: Optional[list[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+    extra_pages: int = 0,
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
 
@@ -120,12 +129,35 @@ def create_app(
         The local state schema details.
     params
         Transaction parameters to use when sending the ``ApplicationCreateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
+    extra_pages
+        Provides extra program size.
 
     Returns
     -------
     int
         The application ID of the deployed smart contract.
     """
+    # Materialize all of the optional arguments
+    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
     # Declare on_complete as NoOp
     on_complete = transaction.OnComplete.NoOpOC.real
 
@@ -138,6 +170,14 @@ def create_app(
         clear_compiled,
         global_schema,
         local_schema,
+        app_args=app_args_bytes,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+        extra_pages=extra_pages,
     )
 
     return owner, txn
@@ -352,7 +392,7 @@ def payment_transaction(
     close_remainder_to
         An Algorand address to close any remainder to.
     note
-        A note to attach along with the payment transaction.
+        A note to attach to the payment transaction.
     lease
         A unique lease where no other transaction from the same sender and same lease
         can be confirmed during the transactions valid rounds.
