@@ -14,6 +14,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+import pyteal
 from algosdk import mnemonic
 from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
@@ -24,7 +25,6 @@ from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
-from .type_stubs import PyTEAL
 
 
 ## CLIENTS
@@ -240,17 +240,17 @@ def _compile_source(source: str) -> bytes:
     return base64.b64decode(compile_response["result"])
 
 
-def compile_program(program: PyTEAL, mode: Mode, version: int = 5) -> bytes:
-    """Compiles a PyTEAL smart contract program to the TEAL binary code.
+def compile_program(program: pyteal.Expr, mode: Mode, version: int = 5) -> bytes:
+    """Compiles a PyTeal smart contract program to the TEAL binary code.
 
     Parameters
     ----------
     program
-        A PyTEAL expression representing an Algorand program.
+        A PyTeal expression representing an Algorand program.
     mode
-        The mode with which to compile the supplied PyTEAL program.
+        The mode with which to compile the supplied PyTeal program.
     version
-        The version with which to compile the supplied PyTEAL program.
+        The version with which to compile the supplied PyTeal program.
 
     Returns
     -------

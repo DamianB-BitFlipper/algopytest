@@ -1,6 +1,7 @@
 from types import TracebackType
 from typing import Callable, Optional, Tuple, Type
 
+import pyteal
 import typing_extensions
 from algosdk.future import transaction
 from pyteal import Mode
@@ -8,7 +9,6 @@ from pyteal import Mode
 from .client_ops import compile_program
 from .entities import AlgoUser
 from .transaction_ops import create_app, delete_app
-from .type_stubs import PyTEAL
 
 
 class DeployedSmartContract:
@@ -31,8 +31,8 @@ class DeployedSmartContract:
 
 def deploy_smart_contract(
     owner: AlgoUser,
-    approval_program: PyTEAL,
-    clear_program: PyTEAL,
+    approval_program: pyteal.Expr,
+    clear_program: pyteal.Expr,
     version: int = 5,
     local_ints: int = 0,
     local_bytes: int = 0,
