@@ -173,7 +173,7 @@ def transaction_info(transaction_id: int) -> dict[str, Any]:
 
 @_wait_for_indexer
 def application_global_state(
-    app_id: int, address_fields: list[str] = []
+    app_id: int, address_fields: Optional[list[str]] = None
 ) -> dict[str, str]:
     """Read the global state of an application.
 
@@ -196,7 +196,7 @@ def application_global_state(
 
 @_wait_for_indexer
 def application_local_state(
-    app_id: int, account: AlgoUser, address_fields: list[str] = []
+    app_id: int, account: AlgoUser, address_fields: Optional[list[str]]
 ) -> dict[str, str]:
     """Read the local sate of an account relating to an application.
 
@@ -276,9 +276,12 @@ def _base64_to_str(b64: str) -> str:
 
 
 def _convert_algo_dict(
-    algo_dict: list[dict[str, Any]], address_fields: list[str]
+    algo_dict: list[dict[str, Any]], address_fields: Optional[list[str]]
 ) -> dict[str, str]:
     """Converts an Algorand dictionary to a Python one."""
+    # Materialize the `address_fields` to a list type
+    address_fields = address_fields or []
+
     ret = {}
     for entry in algo_dict:
         key = _base64_to_str(entry["key"])
