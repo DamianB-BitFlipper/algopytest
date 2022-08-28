@@ -1,8 +1,4 @@
-from typing import Callable, Generator, TypeVar
-
-import pyteal
-
-from .entities import AlgoUser
+from typing import Generator, TypeVar
 
 # Type for PyTest fixtures which yield a fixture themselves
 T = TypeVar("T")
