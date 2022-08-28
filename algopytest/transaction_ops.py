@@ -260,7 +260,8 @@ def update_app(
     app_id: int,
     approval_compiled: bytes,
     clear_compiled: bytes,
-    *params: Optional[transaction.SuggestedParams],
+    *,
+    params: Optional[transaction.SuggestedParams],
     app_args: Optional[list[str]] = None,
     accounts: Optional[list[str]] = None,
     foreign_apps: Optional[list[int]] = None,
@@ -332,7 +333,17 @@ def update_app(
     format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def opt_in_app(
-    sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
+    sender: AlgoUser,
+    app_id: int,
+    params: Optional[transaction.SuggestedParams],
+    *,
+    app_args: Optional[list[str]] = None,
+    accounts: Optional[list[str]] = None,
+    foreign_apps: Optional[list[int]] = None,
+    foreign_assets: Optional[list[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
@@ -344,12 +355,44 @@ def opt_in_app(
         The application ID of the deployed smart contract.
     params
         Transaction parameters to use when sending the ``ApplicationOptInTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
-    txn = transaction.ApplicationOptInTxn(sender.address, params, app_id)
+    # Materialize all of the optional arguments
+    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
+    txn = transaction.ApplicationOptInTxn(
+        sender.address,
+        params,
+        app_id,
+        app_args=app_args_bytes,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
     return sender, txn
 
 
