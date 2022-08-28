@@ -82,5 +82,9 @@ jobs:
           export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
           coverage run --append --source=algopytest -m pytest ./demos/algo-diploma/ -vx --color=yes
 
+      - name: Generate the coverage report
+        run: |
+          coverage xml
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
