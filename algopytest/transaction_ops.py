@@ -6,7 +6,6 @@ from algosdk.future import transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
-from .type_stubs import PyTEAL
 
 
 def transaction_boilerplate(

@@ -14,6 +14,9 @@ straightforward as possible.
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
 
+### Other Changes
+- Inputs which accept ``PyTEAL`` directly take the ``pyteal.Expr`` and not a function which generates a ``pyteal.Expr``
+
 ## [1.0.0] - 2022-02-09
 
 The first release of AlgoPytest. Includes many functions to write usable tests as well as a good foundation to expand this library
