@@ -196,7 +196,7 @@ def application_global_state(
 
 @_wait_for_indexer
 def application_local_state(
-    app_id: int, account: AlgoUser, address_fields: Optional[list[str]]
+    app_id: int, account: AlgoUser, address_fields: Optional[list[str]] = None
 ) -> dict[str, str]:
     """Read the local sate of an account relating to an application.
 
