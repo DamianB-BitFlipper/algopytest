@@ -260,7 +260,14 @@ def update_app(
     app_id: int,
     approval_compiled: bytes,
     clear_compiled: bytes,
-    params: Optional[transaction.SuggestedParams],
+    *params: Optional[transaction.SuggestedParams],
+    app_args: Optional[list[str]] = None,
+    accounts: Optional[list[str]] = None,
+    foreign_apps: Optional[list[int]] = None,
+    foreign_assets: Optional[list[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Update a deployed smart contract.
 
@@ -276,13 +283,45 @@ def update_app(
         The TEAL compiled binary code of the clear program.
     params
         Transaction parameters to use when sending the ``ApplicationUpdateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
+    # Materialize all of the optional arguments
+    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
     txn = transaction.ApplicationUpdateTxn(
-        owner.address, params, app_id, approval_compiled, clear_compiled
+        owner.address,
+        params,
+        app_id,
+        approval_compiled,
+        clear_compiled,
+        app_args=app_args_bytes,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
     )
 
     return owner, txn
