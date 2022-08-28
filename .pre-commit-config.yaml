@@ -22,6 +22,7 @@ repos:
     rev: v0.931  # Use the sha / tag you want to point at
     hooks:
     - id: mypy
+      exclude: ^tests/
 -   repo: local
     hooks:
     - id: spellcheck
