@@ -6,7 +6,6 @@ from algosdk.future import transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, NullUser
-from .type_stubs import PyTEAL
 
 
 def transaction_boilerplate(
@@ -332,7 +331,7 @@ def payment_transaction(
     amount: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    close_remainder_to: AlgoUser = NullUser,
+    close_remainder_to: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -363,6 +362,9 @@ def payment_transaction(
     -------
     None
     """
+    # Materialize the `close_remainder_to` to an `AlgoUser`
+    close_remainder_to = close_remainder_to or NullUser
+
     txn = transaction.PaymentTxn(
         sender.address,
         params,

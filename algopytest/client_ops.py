@@ -14,6 +14,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+import pyteal
 from algosdk import mnemonic
 from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
@@ -24,7 +25,6 @@ from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
-from .type_stubs import PyTEAL
 
 
 ## CLIENTS
@@ -156,7 +156,7 @@ def _initial_funds_account() -> AlgoUser:
 
     # Sanity check
     if initial_address is None:
-        raise Exception("Initial funds account not yet created!")
+        raise RuntimeError("Initial funds account not yet created!")
 
     passphrase = _cli_passphrase_for_account(initial_address)
     private_key = mnemonic.to_private_key(passphrase)
@@ -173,7 +173,7 @@ def transaction_info(transaction_id: int) -> dict[str, Any]:
 
 @_wait_for_indexer
 def application_global_state(
-    app_id: int, address_fields: list[str] = []
+    app_id: int, address_fields: Optional[list[str]] = None
 ) -> dict[str, str]:
     """Read the global state of an application.
 
@@ -196,7 +196,7 @@ def application_global_state(
 
 @_wait_for_indexer
 def application_local_state(
-    app_id: int, account: AlgoUser, address_fields: list[str] = []
+    app_id: int, account: AlgoUser, address_fields: Optional[list[str]] = None
 ) -> dict[str, str]:
     """Read the local sate of an account relating to an application.
 
@@ -240,24 +240,24 @@ def _compile_source(source: str) -> bytes:
     return base64.b64decode(compile_response["result"])
 
 
-def compile_program(program: PyTEAL, mode: Mode, version: int = 5) -> bytes:
-    """Compiles a PyTEAL smart contract program to the TEAL binary code.
+def compile_program(program: pyteal.Expr, mode: Mode, version: int = 5) -> bytes:
+    """Compiles a PyTeal smart contract program to the TEAL binary code.
 
     Parameters
     ----------
     program
-        A function which generates a PyTEAL expression, representing an Algorand program.
+        A PyTeal expression representing an Algorand program.
     mode
-        The mode with which to compile the supplied PyTEAL program.
+        The mode with which to compile the supplied PyTeal program.
     version
-        The version with which to compile the supplied PyTEAL program.
+        The version with which to compile the supplied PyTeal program.
 
     Returns
     -------
     bytes
         The TEAL compiled binary code.
     """
-    source = compileTeal(program(), mode=mode, version=version)
+    source = compileTeal(program, mode=mode, version=version)
     return _compile_source(source)
 
 
@@ -276,9 +276,12 @@ def _base64_to_str(b64: str) -> str:
 
 
 def _convert_algo_dict(
-    algo_dict: list[dict[str, Any]], address_fields: list[str]
+    algo_dict: list[dict[str, Any]], address_fields: Optional[list[str]]
 ) -> dict[str, str]:
     """Converts an Algorand dictionary to a Python one."""
+    # Materialize the `address_fields` to a list type
+    address_fields = address_fields or []
+
     ret = {}
     for entry in algo_dict:
         key = _base64_to_str(entry["key"])
