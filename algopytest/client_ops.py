@@ -246,7 +246,7 @@ def compile_program(program: PyTEAL, mode: Mode, version: int = 5) -> bytes:
     Parameters
     ----------
     program
-        A function which generates a PyTEAL expression, representing an Algorand program.
+        A PyTEAL expression representing an Algorand program.
     mode
         The mode with which to compile the supplied PyTEAL program.
     version
@@ -257,7 +257,7 @@ def compile_program(program: PyTEAL, mode: Mode, version: int = 5) -> bytes:
     bytes
         The TEAL compiled binary code.
     """
-    source = compileTeal(program(), mode=mode, version=version)
+    source = compileTeal(program, mode=mode, version=version)
     return _compile_source(source)
 
 
