@@ -654,6 +654,55 @@ def payment_transaction(
     return sender, txn
 
 
+@transaction_boilerplate()
+def create_asset(
+    sender: AlgoUser,
+    manager: AlgoUser,
+    reserve: AlgoUser,
+    freeze: AlgoUser,
+    clawback: AlgoUser,
+    asset_name: str,
+    total: int,
+    decimals: int,
+    unit_name: str,
+    default_frozen: bool,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    url: str = "",
+    metadata_hash: str = "",
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Create an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetCreateTxn(
+        sender.address,
+        params,
+        total=total,
+        decimals=decimals,
+        default_frozen=default_frozen,
+        manager=manager.address,
+        reserve=reserve.address,
+        freeze=freeze.address,
+        clawback=clawback.address,
+        unit_name=unit_name,
+        asset_name=asset_name,
+        url=url,
+        metadata_hash=metadata_hash.encode(),
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
 @transaction_boilerplate(
     no_sign=True,
 )
