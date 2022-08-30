@@ -101,7 +101,16 @@ def create_app(
     clear_compiled: bytes,
     global_schema: transaction.StateSchema,
     local_schema: transaction.StateSchema,
+    *,
     params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+    extra_pages: int = 0,
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
 
@@ -119,12 +128,35 @@ def create_app(
         The local state schema details.
     params
         Transaction parameters to use when sending the ``ApplicationCreateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
+    extra_pages
+        Provides extra program size.
 
     Returns
     -------
     int
         The application ID of the deployed smart contract.
     """
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
     # Declare on_complete as NoOp
     on_complete = transaction.OnComplete.NoOpOC.real
 
@@ -137,6 +169,14 @@ def create_app(
         clear_compiled,
         global_schema,
         local_schema,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+        extra_pages=extra_pages,
     )
 
     return owner, txn
@@ -147,7 +187,17 @@ def create_app(
     format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def delete_app(
-    owner: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
+    owner: AlgoUser,
+    app_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Delete a deployed smart contract.
 
@@ -159,12 +209,44 @@ def delete_app(
         The application ID of the deployed smart contract.
     params
         Transaction parameters to use when sending the ``ApplicationDeleteTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
-    txn = transaction.ApplicationDeleteTxn(owner.address, params, app_id)
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
+    txn = transaction.ApplicationDeleteTxn(
+        owner.address,
+        params,
+        app_id,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
     return owner, txn
 
 
@@ -177,7 +259,15 @@ def update_app(
     app_id: int,
     approval_compiled: bytes,
     clear_compiled: bytes,
+    *,
     params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Update a deployed smart contract.
 
@@ -193,13 +283,45 @@ def update_app(
         The TEAL compiled binary code of the clear program.
     params
         Transaction parameters to use when sending the ``ApplicationUpdateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
     txn = transaction.ApplicationUpdateTxn(
-        owner.address, params, app_id, approval_compiled, clear_compiled
+        owner.address,
+        params,
+        app_id,
+        approval_compiled,
+        clear_compiled,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
     )
 
     return owner, txn
@@ -210,7 +332,17 @@ def update_app(
     format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def opt_in_app(
-    sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
+    sender: AlgoUser,
+    app_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
@@ -222,12 +354,44 @@ def opt_in_app(
         The application ID of the deployed smart contract.
     params
         Transaction parameters to use when sending the ``ApplicationOptInTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
-    txn = transaction.ApplicationOptInTxn(sender.address, params, app_id)
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
+    txn = transaction.ApplicationOptInTxn(
+        sender.address,
+        params,
+        app_id,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
     return sender, txn
 
 
@@ -236,7 +400,17 @@ def opt_in_app(
     format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def close_out_app(
-    sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
+    sender: AlgoUser,
+    app_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Close-out from a deployed smart contract.
 
@@ -248,12 +422,44 @@ def close_out_app(
         The application ID of the deployed smart contract.
     params
         Transaction parameters to use when sending the ``ApplicationCloseOutTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
-    txn = transaction.ApplicationCloseOutTxn(sender.address, params, app_id)
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
+    txn = transaction.ApplicationCloseOutTxn(
+        sender.address,
+        params,
+        app_id,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
     return sender, txn
 
 
@@ -262,7 +468,17 @@ def close_out_app(
     format_finish=lambda txninfo: f'app-id={txninfo["txn"]["txn"]["apid"]}',
 )
 def clear_app(
-    sender: AlgoUser, app_id: int, params: Optional[transaction.SuggestedParams]
+    sender: AlgoUser,
+    app_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Clear from a deployed smart contract.
 
@@ -274,12 +490,44 @@ def clear_app(
         The application ID of the deployed smart contract.
     params
         Transaction parameters to use when sending the ``ApplicationClearStateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
-    txn = transaction.ApplicationClearStateTxn(sender.address, params, app_id)
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
+    txn = transaction.ApplicationClearStateTxn(
+        sender.address,
+        params,
+        app_id,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
     return sender, txn
 
 
@@ -290,9 +538,15 @@ def clear_app(
 def call_app(
     sender: AlgoUser,
     app_id: int,
+    *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[List[str]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Perform an application call to a deployed smart contract.
 
@@ -308,17 +562,39 @@ def call_app(
         Any arguments to pass along with the application call.
     accounts
         Any Algorand account addresses to pass along with the application call.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
     None
     """
+    # Materialize all of the optional arguments
+    app_args = app_args or []
+    accounts = accounts or []
+    foreign_apps = foreign_apps or []
+    foreign_assets = foreign_assets or []
+
     txn = transaction.ApplicationNoOpTxn(
         sender.address,
         params,
         app_id,
-        app_args,
-        accounts,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
     )
     return sender, txn
 
@@ -351,7 +627,7 @@ def payment_transaction(
     close_remainder_to
         An Algorand address to close any remainder to.
     note
-        A note to attach along with the payment transaction.
+        A note to attach to the payment transaction.
     lease
         A unique lease where no other transaction from the same sender and same lease
         can be confirmed during the transactions valid rounds.
@@ -384,6 +660,7 @@ def payment_transaction(
 def smart_signature_transaction(
     smart_signature: bytes,
     txn: transaction.Transaction,
+    *,
     params: Optional[transaction.SuggestedParams],
 ) -> Tuple[AlgoUser, transaction.Transaction]:
     """Write docs here: TODO!"""
