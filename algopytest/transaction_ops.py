@@ -103,10 +103,10 @@ def create_app(
     local_schema: transaction.StateSchema,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -152,7 +152,7 @@ def create_app(
         The application ID of the deployed smart contract.
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -169,7 +169,7 @@ def create_app(
         clear_compiled,
         global_schema,
         local_schema,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -191,10 +191,10 @@ def delete_app(
     app_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -230,7 +230,7 @@ def delete_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -239,7 +239,7 @@ def delete_app(
         owner.address,
         params,
         app_id,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -261,10 +261,10 @@ def update_app(
     clear_compiled: bytes,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -304,7 +304,7 @@ def update_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -315,7 +315,7 @@ def update_app(
         app_id,
         approval_compiled,
         clear_compiled,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -336,10 +336,10 @@ def opt_in_app(
     app_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -375,7 +375,7 @@ def opt_in_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -384,7 +384,7 @@ def opt_in_app(
         sender.address,
         params,
         app_id,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -404,10 +404,10 @@ def close_out_app(
     app_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -443,7 +443,7 @@ def close_out_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -452,7 +452,7 @@ def close_out_app(
         sender.address,
         params,
         app_id,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -472,10 +472,10 @@ def clear_app(
     app_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[list[str]] = None,
-    accounts: Optional[list[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -511,7 +511,7 @@ def clear_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -520,7 +520,7 @@ def clear_app(
         sender.address,
         params,
         app_id,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
@@ -540,10 +540,10 @@ def call_app(
     app_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    app_args: Optional[List[str]] = None,
+    app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
-    foreign_apps: Optional[list[int]] = None,
-    foreign_assets: Optional[list[int]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
@@ -579,7 +579,7 @@ def call_app(
     None
     """
     # Materialize all of the optional arguments
-    app_args_bytes: list[bytes] = [arg.encode() for arg in (app_args or [])]
+    app_args = app_args or []
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
@@ -588,7 +588,7 @@ def call_app(
         sender.address,
         params,
         app_id,
-        app_args=app_args_bytes,
+        app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
