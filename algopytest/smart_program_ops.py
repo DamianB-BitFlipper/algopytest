@@ -1,5 +1,5 @@
 from types import TracebackType
-from typing import Callable, Optional, Tuple, Type
+from typing import Callable, List, Optional, Tuple, Type, Union
 
 import pyteal
 import typing_extensions
@@ -38,6 +38,15 @@ def deploy_smart_contract(
     local_bytes: int = 0,
     global_ints: int = 0,
     global_bytes: int = 0,
+    *,
+    app_args: Optional[List[Union[str, int]]] = None,
+    accounts: Optional[List[str]] = None,
+    foreign_apps: Optional[List[int]] = None,
+    foreign_assets: Optional[List[int]] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+    extra_pages: int = 0,
 ) -> DeployedSmartContract:
     approval_compiled = compile_program(approval_program, Mode.Application, version)
     clear_compiled = compile_program(clear_program, Mode.Application, version)
@@ -51,6 +60,14 @@ def deploy_smart_contract(
         clear_compiled,
         global_schema,
         local_schema,
+        app_args=app_args,
+        accounts=accounts,
+        foreign_apps=foreign_apps,
+        foreign_assets=foreign_assets,
+        note=note,
+        lease=lease,
+        rekey_to=rekey_to,
+        extra_pages=extra_pages,
     )
 
     return DeployedSmartContract(owner, app_id)

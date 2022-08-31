@@ -654,7 +654,10 @@ def payment_transaction(
     return sender, txn
 
 
-@transaction_boilerplate()
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["asset-index"]}',
+    return_fn=lambda txninfo: txninfo["asset-index"],
+)
 def create_asset(
     sender: AlgoUser,
     manager: AlgoUser,
@@ -696,6 +699,37 @@ def create_asset(
         asset_name=asset_name,
         url=url,
         metadata_hash=metadata_hash.encode(),
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["caid"]}',
+)
+def destroy_asset(
+    sender: AlgoUser,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Destroy an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetDestroyTxn(
+        sender.address,
+        params,
+        asset_id,
         note=note.encode(),
         lease=lease.encode(),
         rekey_to=rekey_to,
