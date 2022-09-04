@@ -233,6 +233,21 @@ def account_balance(account: AlgoUser) -> int:
     return account_data["amount"]
 
 
+@_wait_for_indexer
+def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
+    """Return the asset balance amount for the provided `account` and `asset_id`."""
+    account_data = _indexer_client().account_info(account.address)["account"]
+    assets = account_data.get("assets", [])
+
+    # Search for the `asset_id` in `assets`
+    for asset in assets:
+        if asset["asset-id"] == asset_id:
+            return asset["amount"]
+
+    # No `asset_id` was found, so return `None`
+    return None
+
+
 def _compile_source(source: str) -> bytes:
     """Compile and return teal binary code."""
     compile_response = _algod_client().compile(source)
