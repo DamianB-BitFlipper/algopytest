@@ -4,3 +4,6 @@
 [submodule "demos/algo-recurring-payments"]
 	path = demos/algo-recurring-payments
 	url = git@github.com:DamianB-BitFlipper/algo-recurring-payments.git
+[submodule "demos/algo-wizcoin"]
+	path = demos/algo-wizcoin
+	url = git@github.com:DamianB-BitFlipper/algo-wizcoin.git
