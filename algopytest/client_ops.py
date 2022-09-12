@@ -12,7 +12,7 @@ import subprocess
 import time
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 import pyteal
 from algosdk import mnemonic
@@ -42,7 +42,7 @@ def _indexer_client() -> indexer.IndexerClient:
 
 ## SANDBOX
 def _cli_passphrase_for_account(address: str) -> str:
-    """Return passphrase for provided `address`."""
+    """Return passphrase for provided ``address``."""
     process = call_sandbox_command("goal", "account", "export", "-a", address)
 
     if process.stderr:
@@ -167,7 +167,7 @@ def _initial_funds_account() -> AlgoUser:
 
 @_wait_for_indexer
 def transaction_info(transaction_id: int) -> dict[str, Any]:
-    """Return transaction with provided id."""
+    """Return transaction with provided ``transaction_id``."""
     return _indexer_client().transaction(transaction_id)
 
 
@@ -228,14 +228,14 @@ def application_local_state(
 
 @_wait_for_indexer
 def account_balance(account: AlgoUser) -> int:
-    """Return the balance amount for the provided `account`."""
+    """Return the balance amount for the provided ``account``."""
     account_data = _indexer_client().account_info(account.address)["account"]
     return account_data["amount"]
 
 
 @_wait_for_indexer
 def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
-    """Return the asset balance amount for the provided `account` and `asset_id`."""
+    """Return the asset balance amount for the provided ``account`` and ``asset_id``."""
     account_data = _indexer_client().account_info(account.address)["account"]
     assets = account_data.get("assets", [])
 
@@ -246,6 +246,12 @@ def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
 
     # No `asset_id` was found, so return `None`
     return None
+
+
+@_wait_for_indexer
+def asset_info(asset_id: int) -> Dict[str, Any]:
+    """Return the asset information for the provided ``asset_id``."""
+    return _indexer_client().asset_info(asset_id)
 
 
 def _compile_source(source: str) -> bytes:

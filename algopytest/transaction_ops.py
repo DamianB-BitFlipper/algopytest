@@ -784,15 +784,15 @@ def update_asset(
 
 
 @transaction_boilerplate(
-    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["caid"]}',
+    format_finish=lambda txninfo: f'account-addr={txninfo["txn"]["txn"]["fadd"]} asset-id={txninfo["txn"]["txn"]["faid"]}',
 )
 def freeze_asset(
     sender: AlgoUser,
+    target: AlgoUser,
+    new_freeze_state: bool,
     asset_id: int,
     *,
     params: Optional[transaction.SuggestedParams],
-    target: AlgoUser,
-    new_freeze_state: bool,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",

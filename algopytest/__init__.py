@@ -29,6 +29,7 @@ from .client_ops import (
     application_global_state,
     application_local_state,
     asset_balance,
+    asset_info,
     compile_program,
     suggested_params,
 )
