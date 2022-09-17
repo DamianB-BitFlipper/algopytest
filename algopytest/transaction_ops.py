@@ -5,7 +5,7 @@ from algosdk import account
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
-from .entities import AlgoUser, NullUser, MultisigAccount
+from .entities import AlgoUser, MultisigAccount, NullUser
 
 
 def transaction_boilerplate(
@@ -962,7 +962,9 @@ class _MultisigTxn:
         self.multisig_account = multisig_account
 
         # Create the multisig transaction
-        self.transaction = algosdk_transaction.MultisigTransaction(self.inner_transaction, self.multisig_account.attributes)
+        self.transaction = algosdk_transaction.MultisigTransaction(
+            self.inner_transaction, self.multisig_account.attributes
+        )
 
     def sign(self, _: str) -> List[algosdk_transaction.MultisigTransaction]:
         # Sign the multisig transaction
@@ -1008,7 +1010,9 @@ class _GroupTxn:
         # to get the underlying `Transaction`
         flattened_txns = []
         for txn in self.transactions:
-            if isinstance(txn, algosdk_transaction.LogicSigTransaction) or isinstance(txn, _MultisigTxn):
+            if isinstance(txn, algosdk_transaction.LogicSigTransaction) or isinstance(
+                txn, _MultisigTxn
+            ):
                 flattened_txns.append(txn.transaction)
             else:
                 flattened_txns.append(txn)

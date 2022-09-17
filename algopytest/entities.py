@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List, Optional
 
 from algosdk.future import transaction
 
@@ -23,5 +23,5 @@ class MultisigAccount(AlgoUser):
         owners_pub_keys = [owner.address for owner in owner_accounts]
         self.attributes = transaction.Multisig(version, threshold, owners_pub_keys)
 
-        # Instantiate the super `AlgoUser` class 
+        # Instantiate the super `AlgoUser` class
         super().__init__(address=self.attributes.address())
