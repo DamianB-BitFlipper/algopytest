@@ -2,6 +2,7 @@ FILETYPE: Python; .py
 algod
 algosdk
 functools
+multisig
 openpty
 pathlib
 pyteal

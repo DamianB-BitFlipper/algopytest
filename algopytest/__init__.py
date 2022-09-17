@@ -40,6 +40,7 @@ from .transaction_ops import (
     delete_app,
     group_elem,
     group_transaction,
+    multisig_transaction,
     opt_in_app,
     payment_transaction,
     smart_signature_transaction,
@@ -65,4 +66,5 @@ __all__ = [
     "smart_signature_transaction",
     "group_elem",
     "group_transaction",
+    "multisig_transaction",
 ]

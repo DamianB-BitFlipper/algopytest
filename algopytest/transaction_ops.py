@@ -662,7 +662,7 @@ def smart_signature_transaction(
     txn: transaction.Transaction,
     *,
     params: Optional[transaction.SuggestedParams],
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, transaction.LogicSigTransaction]:
     """Write docs here: TODO!"""
     logic_txn = transaction.LogicSigTransaction(txn, smart_signature)
     return NullUser, logic_txn
@@ -679,9 +679,15 @@ def group_elem(txn_factory: Callable) -> Callable:
 
 
 class _GroupTxn:
-    _InputTxnType = Union[transaction.Transaction, transaction.LogicSigTransaction]
+    _InputTxnType = Union[
+        transaction.Transaction,
+        transaction.LogicSigTransaction,
+        transaction.MultisigTransaction,
+    ]
     _SignedTxnType = Union[
-        transaction.SignedTransaction, transaction.LogicSigTransaction
+        transaction.SignedTransaction,
+        transaction.LogicSigTransaction,
+        transaction.MultisigTransaction,
     ]
 
     def __init__(self, transactions: List[Tuple[AlgoUser, _InputTxnType]]):
@@ -715,7 +721,58 @@ class _GroupTxn:
 def group_transaction(
     *transactions: Tuple[AlgoUser, transaction.Transaction],
 ) -> Tuple[AlgoUser, _GroupTxn]:
+    """Write docs here: TODO!"""
     # The signers are already included as the first elements
     # of the tuples in `transactions`, so return the `NullUser`
     # as the signer of this group transaction
     return NullUser, _GroupTxn(list(transactions))
+
+
+class _MultisigTxn:
+    def __init__(
+        self,
+        transaction: Tuple[AlgoUser, transaction.Transaction],
+        signing_accounts: List[AlgoUser],
+        version: int,
+        threshold: int,
+        multisig_account_owners: List[AlgoUser],
+    ):
+        # Ignore the `AlgoUser` joined to the `transaction`. The signers are in `signing_accounts`
+        self.txn = transaction[1]
+        self.signing_accounts = signing_accounts
+        self.version = version
+        self.threshold = threshold
+        self.multisig_account_owners = multisig_account_owners
+
+    def sign(self, _: str) -> List[transaction.MultisigTransaction]:
+        # Create the multisig options relating to the multisig account
+        owners_pub_keys = [owner.address for owner in self.multisig_account_owners]
+        multisig_options = transaction.Multisig(
+            self.version, self.threshold, owners_pub_keys
+        )
+
+        # Create and sign the multisig transaction
+        mtx = transaction.MultisigTransaction(self.txn, multisig_options)
+        for signing_account in self.signing_accounts:
+            mtx.sign(signing_account.private_key)
+
+        return mtx
+
+
+@transaction_boilerplate(
+    no_params=True,
+)
+def multisig_transaction(
+    transaction: Tuple[AlgoUser, transaction.Transaction],
+    signing_accounts: List[AlgoUser],
+    version: int,
+    threshold: int,
+    multisig_account_owners: List[AlgoUser],
+) -> Tuple[AlgoUser, _MultisigTxn]:
+    """Write docs here: TODO!"""
+    # The signers are specified in the `signing_accounts` list and are
+    # handled specially by the `_MultisigTxn` class. So return the `NullUser`
+    # as the signer as a placeholder
+    return NullUser, _MultisigTxn(
+        transaction, signing_accounts, version, threshold, multisig_account_owners
+    )
