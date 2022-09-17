@@ -957,21 +957,21 @@ class _MultisigTxn:
         multisig_account: MultisigAccount,
     ):
         # Ignore the `AlgoUser` provided with the `transaction`. The signers are in `signing_accounts`
-        self.inner_transaction = transaction[1]
+        self.transaction = transaction[1]
         self.signing_accounts = signing_accounts
         self.multisig_account = multisig_account
 
         # Create the multisig transaction
-        self.transaction = algosdk_transaction.MultisigTransaction(
-            self.inner_transaction, self.multisig_account.attributes
+        self.multisig_transaction = algosdk_transaction.MultisigTransaction(
+            self.transaction, self.multisig_account.attributes
         )
 
-    def sign(self, _: str) -> List[algosdk_transaction.MultisigTransaction]:
+    def sign(self, _: Optional[str]) -> List[algosdk_transaction.MultisigTransaction]:
         # Sign the multisig transaction
         for signing_account in self.signing_accounts:
-            self.transaction.sign(signing_account.private_key)
+            self.multisig_transaction.sign(signing_account.private_key)
 
-        return self.transaction
+        return self.multisig_transaction
 
 
 @transaction_boilerplate(
@@ -1019,7 +1019,7 @@ class _GroupTxn:
 
         algosdk_transaction.assign_group_id(flattened_txns)
 
-    def sign(self, _: str) -> List[_SignedTxnType]:
+    def sign(self, _: Optional[str]) -> List[_SignedTxnType]:
         # Sign all of the transactions
         signed_txns = []
         for signer, txn in zip(self.signers, self.transactions):
@@ -1029,7 +1029,6 @@ class _GroupTxn:
             else:
                 signed_txns.append(txn.sign(signer.private_key))
 
-        breakpoint()
         return signed_txns
 
 
