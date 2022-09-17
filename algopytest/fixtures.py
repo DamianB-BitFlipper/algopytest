@@ -1,7 +1,7 @@
 # So that sphinx picks up on the type aliases
 from __future__ import annotations
 
-from typing import Callable, Generator
+from typing import Callable
 
 import pytest
 from algosdk.future import transaction
