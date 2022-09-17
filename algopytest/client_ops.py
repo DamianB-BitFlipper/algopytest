@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, Optional
 import pyteal
 from algosdk import mnemonic
 from algosdk.error import IndexerHTTPError
-from algosdk.future import transaction
+from algosdk.future import transaction as algosdk_transaction
 from algosdk.future.transaction import LogicSig, PaymentTxn, wait_for_confirmation
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
@@ -73,7 +73,7 @@ def call_sandbox_command(*args: str) -> subprocess.CompletedProcess:
 
 
 ## TRANSACTIONS
-def process_transactions(transactions: list[transaction.Transaction]) -> int:
+def process_transactions(transactions: list[algosdk_transaction.Transaction]) -> int:
     """Send provided grouped `transactions` to network and wait for confirmation."""
     client = _algod_client()
     transaction_id = client.send_transactions(transactions)
@@ -81,7 +81,7 @@ def process_transactions(transactions: list[transaction.Transaction]) -> int:
     return transaction_id
 
 
-def suggested_params(**kwargs: Any) -> transaction.SuggestedParams:
+def suggested_params(**kwargs: Any) -> algosdk_transaction.SuggestedParams:
     """Return the suggested params from the algod client.
 
     Set the provided attributes in ``kwargs`` in the suggested parameters.
