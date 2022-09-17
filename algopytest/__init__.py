@@ -33,7 +33,7 @@ from .client_ops import (
     compile_program,
     suggested_params,
 )
-from .entities import AlgoUser
+from .entities import AlgoUser, MultisigAccount
 from .smart_program_ops import deploy_smart_contract
 from .transaction_ops import (
     call_app,

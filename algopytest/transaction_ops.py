@@ -2,10 +2,10 @@ from functools import wraps
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 from algosdk import account
-from algosdk.future import transaction
+from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
-from .entities import AlgoUser, NullUser
+from .entities import AlgoUser, NullUser, MultisigAccount
 
 
 def transaction_boilerplate(
@@ -99,10 +99,10 @@ def create_app(
     owner: AlgoUser,
     approval_compiled: bytes,
     clear_compiled: bytes,
-    global_schema: transaction.StateSchema,
-    local_schema: transaction.StateSchema,
+    global_schema: algosdk_transaction.StateSchema,
+    local_schema: algosdk_transaction.StateSchema,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -111,7 +111,7 @@ def create_app(
     lease: str = "",
     rekey_to: str = "",
     extra_pages: int = 0,
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
 
     Parameters
@@ -158,10 +158,10 @@ def create_app(
     foreign_assets = foreign_assets or []
 
     # Declare on_complete as NoOp
-    on_complete = transaction.OnComplete.NoOpOC.real
+    on_complete = algosdk_transaction.OnComplete.NoOpOC.real
 
     # Create unsigned transaction
-    txn = transaction.ApplicationCreateTxn(
+    txn = algosdk_transaction.ApplicationCreateTxn(
         owner.address,
         params,
         on_complete,
@@ -190,7 +190,7 @@ def delete_app(
     owner: AlgoUser,
     app_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -198,7 +198,7 @@ def delete_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Delete a deployed smart contract.
 
     Parameters
@@ -235,7 +235,7 @@ def delete_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationDeleteTxn(
+    txn = algosdk_transaction.ApplicationDeleteTxn(
         owner.address,
         params,
         app_id,
@@ -260,7 +260,7 @@ def update_app(
     approval_compiled: bytes,
     clear_compiled: bytes,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -268,7 +268,7 @@ def update_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Update a deployed smart contract.
 
     Parameters
@@ -309,7 +309,7 @@ def update_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationUpdateTxn(
+    txn = algosdk_transaction.ApplicationUpdateTxn(
         owner.address,
         params,
         app_id,
@@ -335,7 +335,7 @@ def opt_in_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -343,7 +343,7 @@ def opt_in_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
     Parameters
@@ -380,7 +380,7 @@ def opt_in_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationOptInTxn(
+    txn = algosdk_transaction.ApplicationOptInTxn(
         sender.address,
         params,
         app_id,
@@ -403,7 +403,7 @@ def close_out_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -411,7 +411,7 @@ def close_out_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Close-out from a deployed smart contract.
 
     Parameters
@@ -448,7 +448,7 @@ def close_out_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationCloseOutTxn(
+    txn = algosdk_transaction.ApplicationCloseOutTxn(
         sender.address,
         params,
         app_id,
@@ -471,7 +471,7 @@ def clear_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -479,7 +479,7 @@ def clear_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Clear from a deployed smart contract.
 
     Parameters
@@ -516,7 +516,7 @@ def clear_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationClearStateTxn(
+    txn = algosdk_transaction.ApplicationClearStateTxn(
         sender.address,
         params,
         app_id,
@@ -539,7 +539,7 @@ def call_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[str]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -547,7 +547,7 @@ def call_app(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Perform an application call to a deployed smart contract.
 
     Parameters
@@ -584,7 +584,7 @@ def call_app(
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
 
-    txn = transaction.ApplicationNoOpTxn(
+    txn = algosdk_transaction.ApplicationNoOpTxn(
         sender.address,
         params,
         app_id,
@@ -606,12 +606,12 @@ def payment_transaction(
     receiver: AlgoUser,
     amount: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     close_remainder_to: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Perform an Algorand payment transaction.
 
     Parameters
@@ -641,7 +641,7 @@ def payment_transaction(
     # Materialize the `close_remainder_to` to an `AlgoUser`
     close_remainder_to = close_remainder_to or NullUser
 
-    txn = transaction.PaymentTxn(
+    txn = algosdk_transaction.PaymentTxn(
         sender.address,
         params,
         receiver.address,
@@ -670,13 +670,13 @@ def create_asset(
     unit_name: str,
     default_frozen: bool,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     url: str = "",
     metadata_hash: str = "",
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Create an Algorand asset.
 
     TODO: write docs!
@@ -685,7 +685,7 @@ def create_asset(
     -------
     None
     """
-    txn = transaction.AssetCreateTxn(
+    txn = algosdk_transaction.AssetCreateTxn(
         sender.address,
         params,
         total=total,
@@ -713,11 +713,11 @@ def destroy_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Destroy an Algorand asset.
 
     TODO: write docs!
@@ -726,7 +726,7 @@ def destroy_asset(
     -------
     None
     """
-    txn = transaction.AssetDestroyTxn(
+    txn = algosdk_transaction.AssetDestroyTxn(
         sender.address,
         params,
         index=asset_id,
@@ -744,7 +744,7 @@ def update_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     manager: Optional[AlgoUser],
     reserve: Optional[AlgoUser],
     freeze: Optional[AlgoUser],
@@ -752,7 +752,7 @@ def update_asset(
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Update an Algorand asset.
 
     TODO: write docs!
@@ -768,7 +768,7 @@ def update_asset(
     freeze = freeze or NullUser
     clawback = clawback or NullUser
 
-    txn = transaction.AssetUpdateTxn(
+    txn = algosdk_transaction.AssetUpdateTxn(
         sender.address,
         params,
         index=asset_id,
@@ -792,11 +792,11 @@ def freeze_asset(
     new_freeze_state: bool,
     asset_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Freeze the Algorand assets of a target user.
 
     TODO: write docs!
@@ -805,7 +805,7 @@ def freeze_asset(
     -------
     None
     """
-    txn = transaction.AssetFreezeTxn(
+    txn = algosdk_transaction.AssetFreezeTxn(
         sender.address,
         params,
         index=asset_id,
@@ -827,13 +827,13 @@ def transfer_asset(
     amount: int,
     asset_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     close_assets_to: Optional[AlgoUser] = None,
     revocation_target: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Transfer Algorand assets to a target recipient.
 
     TODO: write docs!
@@ -846,7 +846,7 @@ def transfer_asset(
     close_assets_to = close_assets_to or NullUser
     revocation_target = revocation_target or NullUser
 
-    txn = transaction.AssetTransferTxn(
+    txn = algosdk_transaction.AssetTransferTxn(
         sender.address,
         params,
         receiver=receiver.address,
@@ -868,11 +868,11 @@ def opt_in_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to an Algorand asset.
 
     TODO: write docs!
@@ -881,7 +881,7 @@ def opt_in_asset(
     -------
     None
     """
-    txn = transaction.AssetOptInTxn(
+    txn = algosdk_transaction.AssetOptInTxn(
         sender.address,
         params,
         asset_id,
@@ -900,11 +900,11 @@ def close_out_asset(
     asset_id: int,
     receiver: AlgoUser,
     *,
-    params: Optional[transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
     rekey_to: str = "",
-) -> Tuple[AlgoUser, transaction.Transaction]:
+) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to an Algorand asset.
 
     TODO: write docs!
@@ -913,7 +913,7 @@ def close_out_asset(
     -------
     None
     """
-    txn = transaction.AssetCloseOutTxn(
+    txn = algosdk_transaction.AssetCloseOutTxn(
         sender.address,
         params,
         receiver.address,
@@ -925,64 +925,107 @@ def close_out_asset(
     return sender, txn
 
 
-@transaction_boilerplate(
-    no_sign=True,
-)
-def smart_signature_transaction(
-    smart_signature: bytes,
-    txn: transaction.Transaction,
-    *,
-    params: Optional[transaction.SuggestedParams],
-) -> Tuple[AlgoUser, transaction.LogicSigTransaction]:
-    """Write docs here: TODO!"""
-    logic_txn = transaction.LogicSigTransaction(txn, smart_signature)
-    return NullUser, logic_txn
-
-
 def group_elem(txn_factory: Callable) -> Callable:
     def no_send_factory(
         *args: Any, **kwargs: Any
-    ) -> Tuple[AlgoUser, transaction.Transaction]:
+    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
         # Disable signing and logging within the `txn_factory`
         return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
 
     return no_send_factory
 
 
+@transaction_boilerplate(
+    no_sign=True,
+)
+def smart_signature_transaction(
+    smart_signature: bytes,
+    txn: algosdk_transaction.Transaction,
+    *,
+    params: Optional[algosdk_transaction.SuggestedParams],
+) -> Tuple[AlgoUser, algosdk_transaction.LogicSigTransaction]:
+    """Write docs here: TODO!"""
+    logic_txn = algosdk_transaction.LogicSigTransaction(txn, smart_signature)
+    return NullUser, logic_txn
+
+
+class _MultisigTxn:
+    def __init__(
+        self,
+        transaction: Tuple[AlgoUser, algosdk_transaction.Transaction],
+        signing_accounts: List[AlgoUser],
+        multisig_account: MultisigAccount,
+    ):
+        # Ignore the `AlgoUser` provided with the `transaction`. The signers are in `signing_accounts`
+        self.inner_transaction = transaction[1]
+        self.signing_accounts = signing_accounts
+        self.multisig_account = multisig_account
+
+        # Create the multisig transaction
+        self.transaction = algosdk_transaction.MultisigTransaction(self.inner_transaction, self.multisig_account.attributes)
+
+    def sign(self, _: str) -> List[algosdk_transaction.MultisigTransaction]:
+        # Sign the multisig transaction
+        for signing_account in self.signing_accounts:
+            self.transaction.sign(signing_account.private_key)
+
+        return self.transaction
+
+
+@transaction_boilerplate(
+    no_params=True,
+)
+def multisig_transaction(
+    multisig_account: MultisigAccount,
+    transaction: Tuple[AlgoUser, algosdk_transaction.Transaction],
+    signing_accounts: List[AlgoUser],
+) -> Tuple[AlgoUser, _MultisigTxn]:
+    """Write docs here: TODO!"""
+    # The signers are specified in the `signing_accounts` list and are
+    # handled specially by the `_MultisigTxn` class. So return the `NullUser`
+    # as the signer as a placeholder
+    return NullUser, _MultisigTxn(transaction, signing_accounts, multisig_account)
+
+
 class _GroupTxn:
     _InputTxnType = Union[
-        transaction.Transaction,
-        transaction.LogicSigTransaction,
-        transaction.MultisigTransaction,
+        algosdk_transaction.Transaction,
+        algosdk_transaction.LogicSigTransaction,
+        _MultisigTxn,
     ]
     _SignedTxnType = Union[
-        transaction.SignedTransaction,
-        transaction.LogicSigTransaction,
-        transaction.MultisigTransaction,
+        algosdk_transaction.SignedTransaction,
+        algosdk_transaction.LogicSigTransaction,
+        algosdk_transaction.MultisigTransaction,
     ]
 
     def __init__(self, transactions: List[Tuple[AlgoUser, _InputTxnType]]):
         # Separate out the `signers` and the `txns`
         self.signers = [signer for signer, _ in transactions]
-        self.txns = [txn for _, txn in transactions]
+        self.transactions = [txn for _, txn in transactions]
 
-        # Assign the group ID, flattening out `LogicSigTransaction` to get the underlying `Transaction`
-        flattened_txns = [
-            txn.transaction if isinstance(txn, transaction.LogicSigTransaction) else txn
-            for txn in self.txns
-        ]
-        transaction.assign_group_id(flattened_txns)
+        # Assign the group ID, flattening out `LogicSigTransaction` and `_MultisigTxn`
+        # to get the underlying `Transaction`
+        flattened_txns = []
+        for txn in self.transactions:
+            if isinstance(txn, algosdk_transaction.LogicSigTransaction) or isinstance(txn, _MultisigTxn):
+                flattened_txns.append(txn.transaction)
+            else:
+                flattened_txns.append(txn)
+
+        algosdk_transaction.assign_group_id(flattened_txns)
 
     def sign(self, _: str) -> List[_SignedTxnType]:
         # Sign all of the transactions
         signed_txns = []
-        for signer, txn in zip(self.signers, self.txns):
+        for signer, txn in zip(self.signers, self.transactions):
             # Logic signature transactions simply get appended since they are already signed
-            if isinstance(txn, transaction.LogicSigTransaction):
+            if isinstance(txn, algosdk_transaction.LogicSigTransaction):
                 signed_txns.append(txn)
             else:
                 signed_txns.append(txn.sign(signer.private_key))
 
+        breakpoint()
         return signed_txns
 
 
@@ -990,60 +1033,10 @@ class _GroupTxn:
     no_params=True,
 )
 def group_transaction(
-    *transactions: Tuple[AlgoUser, transaction.Transaction],
+    *transactions: Tuple[AlgoUser, algosdk_transaction.Transaction],
 ) -> Tuple[AlgoUser, _GroupTxn]:
     """Write docs here: TODO!"""
     # The signers are already included as the first elements
     # of the tuples in `transactions`, so return the `NullUser`
     # as the signer of this group transaction
     return NullUser, _GroupTxn(list(transactions))
-
-
-class _MultisigTxn:
-    def __init__(
-        self,
-        transaction: Tuple[AlgoUser, transaction.Transaction],
-        signing_accounts: List[AlgoUser],
-        version: int,
-        threshold: int,
-        multisig_account_owners: List[AlgoUser],
-    ):
-        # Ignore the `AlgoUser` joined to the `transaction`. The signers are in `signing_accounts`
-        self.txn = transaction[1]
-        self.signing_accounts = signing_accounts
-        self.version = version
-        self.threshold = threshold
-        self.multisig_account_owners = multisig_account_owners
-
-    def sign(self, _: str) -> List[transaction.MultisigTransaction]:
-        # Create the multisig options relating to the multisig account
-        owners_pub_keys = [owner.address for owner in self.multisig_account_owners]
-        multisig_options = transaction.Multisig(
-            self.version, self.threshold, owners_pub_keys
-        )
-
-        # Create and sign the multisig transaction
-        mtx = transaction.MultisigTransaction(self.txn, multisig_options)
-        for signing_account in self.signing_accounts:
-            mtx.sign(signing_account.private_key)
-
-        return mtx
-
-
-@transaction_boilerplate(
-    no_params=True,
-)
-def multisig_transaction(
-    transaction: Tuple[AlgoUser, transaction.Transaction],
-    signing_accounts: List[AlgoUser],
-    version: int,
-    threshold: int,
-    multisig_account_owners: List[AlgoUser],
-) -> Tuple[AlgoUser, _MultisigTxn]:
-    """Write docs here: TODO!"""
-    # The signers are specified in the `signing_accounts` list and are
-    # handled specially by the `_MultisigTxn` class. So return the `NullUser`
-    # as the signer as a placeholder
-    return NullUser, _MultisigTxn(
-        transaction, signing_accounts, version, threshold, multisig_account_owners
-    )
