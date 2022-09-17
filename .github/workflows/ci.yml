@@ -70,7 +70,7 @@ jobs:
 
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          coverage run --source=algopytest -m pytest ./demos/algo-recurring-payments/ -vx --color=yes
+          coverage run --source=algopytest -m pytest ./demos/algo-recurring-payments/ -v --color=yes
 
           # Reset the `INITIAL_FUNDS_ACCOUNT`
           export INITIAL_FUNDS_ACCOUNT=$_INITIAL_FUNDS_ACCOUNT
@@ -80,7 +80,13 @@ jobs:
         run: |
           # So that algo-diploma can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-diploma/assets
-          coverage run --append --source=algopytest -m pytest ./demos/algo-diploma/ -vx --color=yes
+          coverage run --append --source=algopytest -m pytest ./demos/algo-diploma/ -v --color=yes
+
+      - name: Test Algo-WizCoin Unittests
+        run: |
+          # So that algo-wizcoin can be imported by the tests
+          export PYTHONPATH=$(pwd)/demos/algo-wizcoin/assets
+          coverage run --append --source=algopytest -m pytest ./demos/algo-wizcoin/ -v --color=yes
 
       - name: Generate the coverage report
         run: |

@@ -11,6 +11,8 @@ straightforward as possible.
 - Removed ``ProgramStore`` class and replaced it with ``deploy_smart_contract`` which the user would call directly in a user-defined fixture to retrieve the smart contract app ID for testing
 - Implemented support for group transactions to hold both ``Transaction`` and ``LogicSigTransaction``
 - All transaction operations take all possible parameters, even the less commonly used ones.
+- Support ASA operations with the following transaction operations ``create_asset``, ``destroy_asset``, ``update_asset``, ``freeze_asset``, ``transfer_asset``, ``opt_in_asset`` and ``close_out_asset``.
+- Implemented asset related utility functions ``asset_balance`` and ``asset_info``.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
