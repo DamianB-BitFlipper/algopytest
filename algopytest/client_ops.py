@@ -12,11 +12,10 @@ import subprocess
 import time
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 import pyteal
 from algosdk import mnemonic
-from algosdk.encoding import encode_address
 from algosdk.error import IndexerHTTPError
 from algosdk.future import transaction
 from algosdk.future.transaction import LogicSig, PaymentTxn, wait_for_confirmation
@@ -25,6 +24,7 @@ from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
+from .utils import _convert_algo_dict
 
 
 ## CLIENTS
@@ -42,7 +42,7 @@ def _indexer_client() -> indexer.IndexerClient:
 
 ## SANDBOX
 def _cli_passphrase_for_account(address: str) -> str:
-    """Return passphrase for provided `address`."""
+    """Return passphrase for provided ``address``."""
     process = call_sandbox_command("goal", "account", "export", "-a", address)
 
     if process.stderr:
@@ -167,7 +167,7 @@ def _initial_funds_account() -> AlgoUser:
 
 @_wait_for_indexer
 def transaction_info(transaction_id: int) -> dict[str, Any]:
-    """Return transaction with provided id."""
+    """Return transaction with provided ``transaction_id``."""
     return _indexer_client().transaction(transaction_id)
 
 
@@ -228,12 +228,32 @@ def application_local_state(
 
 @_wait_for_indexer
 def account_balance(account: AlgoUser) -> int:
-    """Return the balance amount for the provided `account`."""
+    """Return the balance amount for the provided ``account``."""
     account_data = _indexer_client().account_info(account.address)["account"]
     return account_data["amount"]
 
 
-## UTILITY
+@_wait_for_indexer
+def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
+    """Return the asset balance amount for the provided ``account`` and ``asset_id``."""
+    account_data = _indexer_client().account_info(account.address)["account"]
+    assets = account_data.get("assets", [])
+
+    # Search for the `asset_id` in `assets`
+    for asset in assets:
+        if asset["asset-id"] == asset_id:
+            return asset["amount"]
+
+    # No `asset_id` was found, so return `None`
+    return None
+
+
+@_wait_for_indexer
+def asset_info(asset_id: int) -> Dict[str, Any]:
+    """Return the asset information for the provided ``asset_id``."""
+    return _indexer_client().asset_info(asset_id)
+
+
 def _compile_source(source: str) -> bytes:
     """Compile and return teal binary code."""
     compile_response = _algod_client().compile(source)
@@ -259,44 +279,3 @@ def compile_program(program: pyteal.Expr, mode: Mode, version: int = 5) -> bytes
     """
     source = compileTeal(program, mode=mode, version=version)
     return _compile_source(source)
-
-
-def logic_signature(teal_source: Any) -> Any:
-    """Create and return logic signature for provided `teal_source`."""
-    # TODO: Typing and general behavior
-    compiled_binary = _compile_source(teal_source)
-    return LogicSig(compiled_binary)
-
-
-def _base64_to_str(b64: str) -> str:
-    """Converts a b64 encoded string to a normal UTF-8 string."""
-    # Decode the base64 to bytes and then decode them as a UTF-8 string
-    byte_decoding = base64.b64decode(b64)
-    return byte_decoding.decode("utf-8")
-
-
-def _convert_algo_dict(
-    algo_dict: list[dict[str, Any]], address_fields: Optional[list[str]]
-) -> dict[str, str]:
-    """Converts an Algorand dictionary to a Python one."""
-    # Materialize the `address_fields` to a list type
-    address_fields = address_fields or []
-
-    ret = {}
-    for entry in algo_dict:
-        key = _base64_to_str(entry["key"])
-
-        value_type = entry["value"]["type"]
-
-        if value_type == 1 and key not in address_fields:  # Bytes non-address
-            value = _base64_to_str(entry["value"]["bytes"])
-        elif value_type == 1 and key in address_fields:  # Bytes address
-            value = encode_address(base64.b64decode(entry["value"]["bytes"]))
-        elif value_type == 2:  # Integer
-            value = entry["value"]["uint"]
-        else:
-            raise ValueError(f"Unknown value type for key: {key}")
-
-        ret[key] = value
-
-    return ret

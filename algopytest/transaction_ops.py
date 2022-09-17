@@ -655,6 +655,277 @@ def payment_transaction(
 
 
 @transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["asset-index"]}',
+    return_fn=lambda txninfo: txninfo["asset-index"],
+)
+def create_asset(
+    sender: AlgoUser,
+    manager: AlgoUser,
+    reserve: AlgoUser,
+    freeze: AlgoUser,
+    clawback: AlgoUser,
+    asset_name: str,
+    total: int,
+    decimals: int,
+    unit_name: str,
+    default_frozen: bool,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    url: str = "",
+    metadata_hash: str = "",
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Create an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetCreateTxn(
+        sender.address,
+        params,
+        total=total,
+        decimals=decimals,
+        default_frozen=default_frozen,
+        manager=manager.address,
+        reserve=reserve.address,
+        freeze=freeze.address,
+        clawback=clawback.address,
+        unit_name=unit_name,
+        asset_name=asset_name,
+        url=url,
+        metadata_hash=metadata_hash.encode(),
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["caid"]}',
+)
+def destroy_asset(
+    sender: AlgoUser,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Destroy an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetDestroyTxn(
+        sender.address,
+        params,
+        index=asset_id,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["caid"]}',
+)
+def update_asset(
+    sender: AlgoUser,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    manager: Optional[AlgoUser],
+    reserve: Optional[AlgoUser],
+    freeze: Optional[AlgoUser],
+    clawback: Optional[AlgoUser],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Update an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    # When an optional account is `None`, it refers to
+    # the `NullUser` with an "" empty string address
+    manager = manager or NullUser
+    reserve = reserve or NullUser
+    freeze = freeze or NullUser
+    clawback = clawback or NullUser
+
+    txn = transaction.AssetUpdateTxn(
+        sender.address,
+        params,
+        index=asset_id,
+        manager=manager.address,
+        reserve=reserve.address,
+        freeze=freeze.address,
+        clawback=clawback.address,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'account-addr={txninfo["txn"]["txn"]["fadd"]} asset-id={txninfo["txn"]["txn"]["faid"]}',
+)
+def freeze_asset(
+    sender: AlgoUser,
+    target: AlgoUser,
+    new_freeze_state: bool,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Freeze the Algorand assets of a target user.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetFreezeTxn(
+        sender.address,
+        params,
+        index=asset_id,
+        target=target.address,
+        new_freeze_state=new_freeze_state,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["xaid"]}',
+)
+def transfer_asset(
+    sender: AlgoUser,
+    receiver: AlgoUser,
+    amount: int,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    close_assets_to: Optional[AlgoUser] = None,
+    revocation_target: Optional[AlgoUser] = None,
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Transfer Algorand assets to a target recipient.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    # Materialize all of the optional arguments
+    close_assets_to = close_assets_to or NullUser
+    revocation_target = revocation_target or NullUser
+
+    txn = transaction.AssetTransferTxn(
+        sender.address,
+        params,
+        receiver=receiver.address,
+        amt=amount,
+        index=asset_id,
+        close_assets_to=close_assets_to.address,
+        revocation_target=revocation_target.address,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["xaid"]}',
+)
+def opt_in_asset(
+    sender: AlgoUser,
+    asset_id: int,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Opt-in to an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetOptInTxn(
+        sender.address,
+        params,
+        asset_id,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
+    format_finish=lambda txninfo: f'asset-id={txninfo["txn"]["txn"]["xaid"]}',
+)
+def close_out_asset(
+    sender: AlgoUser,
+    asset_id: int,
+    receiver: AlgoUser,
+    *,
+    params: Optional[transaction.SuggestedParams],
+    note: str = "",
+    lease: str = "",
+    rekey_to: str = "",
+) -> Tuple[AlgoUser, transaction.Transaction]:
+    """Opt-in to an Algorand asset.
+
+    TODO: write docs!
+
+    Returns
+    -------
+    None
+    """
+    txn = transaction.AssetCloseOutTxn(
+        sender.address,
+        params,
+        receiver.address,
+        asset_id,
+        note=note.encode(),
+        lease=lease.encode(),
+        rekey_to=rekey_to,
+    )
+    return sender, txn
+
+
+@transaction_boilerplate(
     no_sign=True,
 )
 def smart_signature_transaction(
