@@ -45,7 +45,6 @@ from .transaction_ops import (
     delete_app,
     destroy_asset,
     freeze_asset,
-    group_elem,
     group_transaction,
     multisig_transaction,
     opt_in_app,
@@ -53,6 +52,7 @@ from .transaction_ops import (
     payment_transaction,
     smart_signature_transaction,
     transfer_asset,
+    txn_elem,
     update_app,
     update_asset,
 )
@@ -85,7 +85,7 @@ __all__ = [
     "opt_in_asset",
     "close_out_asset",
     "smart_signature_transaction",
-    "group_elem",
+    "txn_elem",
     "group_transaction",
     "multisig_transaction",
 ]

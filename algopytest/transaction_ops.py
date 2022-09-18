@@ -925,7 +925,9 @@ def close_out_asset(
     return sender, txn
 
 
-def group_elem(txn_factory: Callable) -> Callable:
+def txn_elem(txn_factory: Callable) -> Callable:
+    """Add Doc String here: TODO!"""
+
     def no_send_factory(
         *args: Any, **kwargs: Any
     ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
