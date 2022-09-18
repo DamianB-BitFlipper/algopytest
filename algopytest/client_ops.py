@@ -50,7 +50,7 @@ def _get_kmd_account_private_key(address: str) -> str:
             break
 
     if wallet_id is None:
-        raise RuntimeError(f"Wallet not found: {ConfigParams.kmd_wallet_name}")
+        raise ValueError(f"Wallet not found: {ConfigParams.kmd_wallet_name}")
 
     wallet_handle = kmd.init_wallet_handle(wallet_id, ConfigParams.kmd_wallet_password)
 
