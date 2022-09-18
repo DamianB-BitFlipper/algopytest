@@ -1,5 +1,5 @@
 from types import TracebackType
-from typing import Callable, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Type, Union
 
 import pyteal
 import typing_extensions
