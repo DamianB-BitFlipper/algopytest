@@ -37,7 +37,7 @@ def _indexer_client() -> indexer.IndexerClient:
 
 
 ## KMD
-def _get_account_private_key(address: str) -> str:
+def _get_kmd_account_private_key(address: str) -> str:
     """Return passphrase for provided ``address``."""
     # Inspired by https://github.com/algorand-devrel/demo-avm1.1/blob/master/demos/utils/sandbox.py
     kmd = KMDClient(ConfigParams.kmd_token, ConfigParams.kmd_address)
@@ -153,7 +153,7 @@ def _initial_funds_account() -> AlgoUser:
     if initial_address is None:
         raise RuntimeError("Initial funds account not yet created!")
 
-    private_key = _get_account_private_key(initial_address)
+    private_key = _get_kmd_account_private_key(initial_address)
 
     # Return an `AlgoUser` of the initial account
     return AlgoUser(initial_address, private_key)
