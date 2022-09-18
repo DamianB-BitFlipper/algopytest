@@ -20,7 +20,7 @@ def add_standalone_account(funded: bool = True) -> AlgoUser:
 def fund_account(
     receiving_account: AlgoUser, initial_funds: int = 1_000_000_000
 ) -> None:
-    """Fund the `receiving_account` with `initial_funds` amount of microAlgos."""
+    """Fund the ``receiving_account`` with ``initial_funds`` amount of microAlgos."""
     initial_account = _initial_funds_account()
     if initial_account is None:
         raise RuntimeError("Initial funds were not transferred!")
@@ -34,7 +34,7 @@ def fund_account(
 
 
 def defund_account(defunding_account: AlgoUser) -> None:
-    """Return the entire balance of `defunding_account` back to the `initial_account`."""
+    """Return the entire balance of ``defunding_account`` back to the ``initial_account``."""
     initial_account = _initial_funds_account()
     if initial_account is None:
         raise RuntimeError("Initial funds were not transferred!")
