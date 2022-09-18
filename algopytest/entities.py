@@ -12,7 +12,7 @@ class AlgoUser:
     private_key: Optional[str] = None
 
 
-NullUser = AlgoUser(address="")
+_NullUser = AlgoUser(address="")
 
 
 class MultisigAccount(AlgoUser):
