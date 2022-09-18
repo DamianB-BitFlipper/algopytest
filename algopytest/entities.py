@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+import algosdk
 from algosdk.future import transaction as algosdk_transaction
 
 
@@ -13,6 +14,16 @@ class AlgoUser:
 
 
 _NullUser = AlgoUser(address="")
+
+
+class SmartContractAccount(AlgoUser):
+    """An Algorand user subclass representing a smart contract's account address."""
+
+    def __init__(self, app_id: int):
+        smart_contract_address = algosdk.logic.get_application_address(app_id)
+
+        # Instantiate the super `AlgoUser` class
+        super().__init__(address=smart_contract_address)
 
 
 class MultisigAccount(AlgoUser):
