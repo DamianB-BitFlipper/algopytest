@@ -14,6 +14,7 @@ straightforward as possible.
 - Implemented asset related utility functions ``asset_balance`` and ``asset_info``.
 - Support multi-signature transaction with the ``multisig_transaction`` transaction operation.
 - Implemented a ``SmartContractAccount`` entity to hold the address of a smart contract as an ``AlgoUser``.
+- Utilize the ``KMD`` to access account private keys of the sandbox.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8

@@ -1,17 +1,12 @@
 """
 Module containing helper functions for accessing Algorand blockchain.
-
-Inspired from: https://github.com/ipaleka/algorand-contracts-testing/blob/main/helpers.py
 """
 # So that sphinx picks up on the type aliases
 from __future__ import annotations
 
 import base64
-import pty
-import subprocess
 import time
 from functools import lru_cache, wraps
-from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 import pyteal
@@ -19,6 +14,7 @@ from algosdk import mnemonic
 from algosdk.error import IndexerHTTPError
 from algosdk.future import transaction as algosdk_transaction
 from algosdk.future.transaction import LogicSig, PaymentTxn, wait_for_confirmation
+from algosdk.kmd import KMDClient
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
@@ -40,36 +36,32 @@ def _indexer_client() -> indexer.IndexerClient:
     )
 
 
-## SANDBOX
-def _cli_passphrase_for_account(address: str) -> str:
+## KMD
+def _get_kmd_account_private_key(address: str) -> str:
     """Return passphrase for provided ``address``."""
-    process = call_sandbox_command("goal", "account", "export", "-a", address)
+    # Inspired by https://github.com/algorand-devrel/demo-avm1.1/blob/master/demos/utils/sandbox.py
+    kmd = KMDClient(ConfigParams.kmd_token, ConfigParams.kmd_address)
+    wallets = kmd.list_wallets()
 
-    if process.stderr:
-        raise RuntimeError(process.stderr.decode("utf8"))
+    wallet_id = None
+    for wallet in wallets:
+        if wallet["name"] == ConfigParams.kmd_wallet_name:
+            wallet_id = wallet["id"]
+            break
 
-    passphrase = ""
-    parts = process.stdout.decode("utf8").split('"')
-    if len(parts) > 1:
-        passphrase = parts[1]
-    if passphrase == "":
-        raise ValueError(
-            "Can't retrieve passphrase from the address: %s\noutput: %s"
-            % (address, process.stdout.decode("utf8"))
+    if wallet_id is None:
+        raise ValueError(f"Wallet not found: {ConfigParams.kmd_wallet_name}")
+
+    wallet_handle = kmd.init_wallet_handle(wallet_id, ConfigParams.kmd_wallet_password)
+
+    try:
+        private_key = kmd.export_key(
+            wallet_handle, ConfigParams.kmd_wallet_password, address
         )
-    return passphrase
+    finally:
+        kmd.release_wallet_handle(wallet_handle)
 
-
-def _sandbox_executable() -> Path:
-    """Return full path to Algorand's sandbox executable."""
-    return ConfigParams.sandbox_dir / "sandbox"
-
-
-def call_sandbox_command(*args: str) -> subprocess.CompletedProcess:
-    """Call and return sandbox command composed from provided arguments."""
-    return subprocess.run(
-        [_sandbox_executable(), *args], stdin=pty.openpty()[1], capture_output=True
-    )
+    return private_key
 
 
 ## TRANSACTIONS
@@ -161,8 +153,7 @@ def _initial_funds_account() -> AlgoUser:
     if initial_address is None:
         raise RuntimeError("Initial funds account not yet created!")
 
-    passphrase = _cli_passphrase_for_account(initial_address)
-    private_key = mnemonic.to_private_key(passphrase)
+    private_key = _get_kmd_account_private_key(initial_address)
 
     # Return an `AlgoUser` of the initial account
     return AlgoUser(initial_address, private_key)
