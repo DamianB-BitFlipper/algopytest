@@ -22,6 +22,7 @@ straightforward as possible.
 - Inputs which accept ``PyTEAL`` directly take the ``pyteal.Expr`` and not a function which generates a ``pyteal.Expr``
 - All transaction operations take all possible parameters, even the less commonly used ones.
 - The AlgoPytest API accepts ``AlgoUser`` as a user input anywhere whenever an address is requested.
+- Sped up the ``AlgoPytest`` test suite runtime by caching the ``_initial_funds_account``.
 
 ## [1.0.0] - 2022-02-09
 
