@@ -66,7 +66,7 @@ def _get_kmd_account_private_key(address: str) -> str:
 
 ## TRANSACTIONS
 def process_transactions(transactions: list[algosdk_transaction.Transaction]) -> int:
-    """Send provided grouped `transactions` to network and wait for confirmation."""
+    """Send provided grouped ``transactions`` to network and wait for confirmation."""
     client = _algod_client()
     transaction_id = client.send_transactions(transactions)
     wait_for_confirmation(client, transaction_id, 4)
@@ -95,7 +95,7 @@ def pending_transaction_info(transaction_id: int) -> dict[str, Any]:
 ## INDEXER RETRIEVAL
 def _wait_for_indexer(func: Callable) -> Callable:
     """A decorator function to automatically wait for indexer timeout
-    when running `func`.
+    when running ``func``.
     """
     # To preserve the original type signature of `func` in the sphinx docs
     @wraps(func)
