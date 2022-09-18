@@ -10,18 +10,18 @@ straightforward as possible.
 - Function ``group_transaction`` to send group transactions
 - Removed ``ProgramStore`` class and replaced it with ``deploy_smart_contract`` which the user would call directly in a user-defined fixture to retrieve the smart contract app ID for testing
 - Implemented support for group transactions to hold both ``Transaction`` and ``LogicSigTransaction``
-- All transaction operations take all possible parameters, even the less commonly used ones.
 - Support ASA operations with the following transaction operations ``create_asset``, ``destroy_asset``, ``update_asset``, ``freeze_asset``, ``transfer_asset``, ``opt_in_asset`` and ``close_out_asset``.
 - Implemented asset related utility functions ``asset_balance`` and ``asset_info``.
 - Support multi-signature transaction with the ``multisig_transaction`` transaction operation.
 - Implemented a ``SmartContractAccount`` entity to hold the address of a smart contract as an ``AlgoUser``.
-- The AlgoPytest API accepts ``AlgoUser`` as a user input anywhere whenever an address is requested.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
 
 ### Other Changes
 - Inputs which accept ``PyTEAL`` directly take the ``pyteal.Expr`` and not a function which generates a ``pyteal.Expr``
+- All transaction operations take all possible parameters, even the less commonly used ones.
+- The AlgoPytest API accepts ``AlgoUser`` as a user input anywhere whenever an address is requested.
 
 ## [1.0.0] - 2022-02-09
 
