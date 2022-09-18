@@ -3,7 +3,7 @@ from typing import List, Optional, Type, Union
 
 import pyteal
 import typing_extensions
-from algosdk.future import transaction
+from algosdk.future import transaction as algosdk_transaction
 from pyteal import Mode
 
 from .client_ops import compile_program
@@ -50,8 +50,8 @@ def deploy_smart_contract(
 ) -> DeployedSmartContract:
     approval_compiled = compile_program(approval_program, Mode.Application, version)
     clear_compiled = compile_program(clear_program, Mode.Application, version)
-    global_schema = transaction.StateSchema(global_ints, global_bytes)
-    local_schema = transaction.StateSchema(local_ints, local_bytes)
+    global_schema = algosdk_transaction.StateSchema(global_ints, global_bytes)
+    local_schema = algosdk_transaction.StateSchema(local_ints, local_bytes)
 
     # Deploy the smart contract
     app_id = create_app(

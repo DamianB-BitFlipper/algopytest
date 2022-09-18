@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Callable
 
 import pytest
-from algosdk.future import transaction
 from pyteal import Mode
 
 from .account_ops import add_standalone_account, defund_account
