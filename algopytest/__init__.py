@@ -33,7 +33,7 @@ from .client_ops import (
     compile_program,
     suggested_params,
 )
-from .entities import AlgoUser, MultisigAccount
+from .entities import AlgoUser, MultisigAccount, SmartContractAccount
 from .smart_program_ops import deploy_smart_contract
 from .transaction_ops import (
     call_app,
@@ -60,6 +60,8 @@ from .transaction_ops import (
 # The functions to expose for sphinx documentation
 __all__ = [
     "AlgoUser",
+    "SmartContractAccount",
+    "MultisigAccount",
     "deploy_smart_contract",
     "account_balance",
     "asset_balance",
