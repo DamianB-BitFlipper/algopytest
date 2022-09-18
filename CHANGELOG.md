@@ -21,6 +21,7 @@ straightforward as possible.
 
 ### Other Changes
 - Inputs which accept ``PyTEAL`` directly take the ``pyteal.Expr`` and not a function which generates a ``pyteal.Expr``
+- Renamed the ``group_elem`` function to a more generic ``txn_name`` since this function applies also to smart signatures and multi-signature transactions, not solely group transactions.
 
 ## [1.0.0] - 2022-02-09
 
