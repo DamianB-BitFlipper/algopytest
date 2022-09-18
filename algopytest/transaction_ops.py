@@ -1,7 +1,6 @@
 from functools import wraps
 from typing import Any, Callable, List, Optional, Tuple, Union
 
-from algosdk import account
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
@@ -104,12 +103,12 @@ def create_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
     extra_pages: int = 0,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Deploy a smart contract from the supplied details.
@@ -156,6 +155,7 @@ def create_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     # Declare on_complete as NoOp
     on_complete = algosdk_transaction.OnComplete.NoOpOC.real
@@ -170,12 +170,12 @@ def create_app(
         global_schema,
         local_schema,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
         extra_pages=extra_pages,
     )
 
@@ -192,12 +192,12 @@ def delete_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Delete a deployed smart contract.
 
@@ -234,18 +234,19 @@ def delete_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationDeleteTxn(
         owner.address,
         params,
         app_id,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return owner, txn
 
@@ -262,12 +263,12 @@ def update_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Update a deployed smart contract.
 
@@ -308,6 +309,7 @@ def update_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationUpdateTxn(
         owner.address,
@@ -316,12 +318,12 @@ def update_app(
         approval_compiled,
         clear_compiled,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
 
     return owner, txn
@@ -337,12 +339,12 @@ def opt_in_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to a deployed smart contract.
 
@@ -379,18 +381,19 @@ def opt_in_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationOptInTxn(
         sender.address,
         params,
         app_id,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -405,12 +408,12 @@ def close_out_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Close-out from a deployed smart contract.
 
@@ -447,18 +450,19 @@ def close_out_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationCloseOutTxn(
         sender.address,
         params,
         app_id,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -473,12 +477,12 @@ def clear_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Clear from a deployed smart contract.
 
@@ -515,18 +519,19 @@ def clear_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationClearStateTxn(
         sender.address,
         params,
         app_id,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -541,12 +546,12 @@ def call_app(
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Perform an application call to a deployed smart contract.
 
@@ -583,18 +588,19 @@ def call_app(
     accounts = accounts or []
     foreign_apps = foreign_apps or []
     foreign_assets = foreign_assets or []
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.ApplicationNoOpTxn(
         sender.address,
         params,
         app_id,
         app_args=app_args,
-        accounts=accounts,
+        accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
         foreign_assets=foreign_assets,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -610,7 +616,7 @@ def payment_transaction(
     close_remainder_to: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Perform an Algorand payment transaction.
 
@@ -638,8 +644,9 @@ def payment_transaction(
     -------
     None
     """
-    # Materialize the `close_remainder_to` to an `AlgoUser`
+    # Materialize all of the optional arguments
     close_remainder_to = close_remainder_to or NullUser
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.PaymentTxn(
         sender.address,
@@ -649,7 +656,7 @@ def payment_transaction(
         close_remainder_to=close_remainder_to.address,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -675,7 +682,7 @@ def create_asset(
     metadata_hash: str = "",
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Create an Algorand asset.
 
@@ -685,6 +692,9 @@ def create_asset(
     -------
     None
     """
+    # Materialize all of the optional arguments
+    rekey_to = rekey_to or NullUser
+
     txn = algosdk_transaction.AssetCreateTxn(
         sender.address,
         params,
@@ -701,7 +711,7 @@ def create_asset(
         metadata_hash=metadata_hash.encode(),
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -716,7 +726,7 @@ def destroy_asset(
     params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Destroy an Algorand asset.
 
@@ -726,13 +736,16 @@ def destroy_asset(
     -------
     None
     """
+    # Materialize all of the optional arguments
+    rekey_to = rekey_to or NullUser
+
     txn = algosdk_transaction.AssetDestroyTxn(
         sender.address,
         params,
         index=asset_id,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -751,7 +764,7 @@ def update_asset(
     clawback: Optional[AlgoUser],
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Update an Algorand asset.
 
@@ -767,6 +780,7 @@ def update_asset(
     reserve = reserve or NullUser
     freeze = freeze or NullUser
     clawback = clawback or NullUser
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.AssetUpdateTxn(
         sender.address,
@@ -778,7 +792,7 @@ def update_asset(
         clawback=clawback.address,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -795,7 +809,7 @@ def freeze_asset(
     params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Freeze the Algorand assets of a target user.
 
@@ -805,6 +819,9 @@ def freeze_asset(
     -------
     None
     """
+    # Materialize all of the optional arguments
+    rekey_to = rekey_to or NullUser
+
     txn = algosdk_transaction.AssetFreezeTxn(
         sender.address,
         params,
@@ -813,7 +830,7 @@ def freeze_asset(
         new_freeze_state=new_freeze_state,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -832,7 +849,7 @@ def transfer_asset(
     revocation_target: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Transfer Algorand assets to a target recipient.
 
@@ -845,6 +862,7 @@ def transfer_asset(
     # Materialize all of the optional arguments
     close_assets_to = close_assets_to or NullUser
     revocation_target = revocation_target or NullUser
+    rekey_to = rekey_to or NullUser
 
     txn = algosdk_transaction.AssetTransferTxn(
         sender.address,
@@ -856,7 +874,7 @@ def transfer_asset(
         revocation_target=revocation_target.address,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -871,7 +889,7 @@ def opt_in_asset(
     params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to an Algorand asset.
 
@@ -881,13 +899,16 @@ def opt_in_asset(
     -------
     None
     """
+    # Materialize all of the optional arguments
+    rekey_to = rekey_to or NullUser
+
     txn = algosdk_transaction.AssetOptInTxn(
         sender.address,
         params,
         asset_id,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
@@ -903,7 +924,7 @@ def close_out_asset(
     params: Optional[algosdk_transaction.SuggestedParams],
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
     """Opt-in to an Algorand asset.
 
@@ -913,6 +934,9 @@ def close_out_asset(
     -------
     None
     """
+    # Materialize all of the optional arguments
+    rekey_to = rekey_to or NullUser
+
     txn = algosdk_transaction.AssetCloseOutTxn(
         sender.address,
         params,
@@ -920,7 +944,7 @@ def close_out_asset(
         asset_id,
         note=note.encode(),
         lease=lease.encode(),
-        rekey_to=rekey_to,
+        rekey_to=rekey_to.address,
     )
     return sender, txn
 
