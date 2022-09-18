@@ -10,7 +10,7 @@ import base64
 import pty
 import subprocess
 import time
-from functools import wraps
+from functools import lru_cache, wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
@@ -108,20 +108,22 @@ def _wait_for_indexer(func: Callable) -> Callable:
     # To preserve the original type signature of `func` in the sphinx docs
     @wraps(func)
     def wrapped(*args: Any, **kwargs: Any) -> Any:
+        sleep_step = 0.1
+
         # First wait for the indexer to catch up with the latest `algod_round`
         algod_round = _algod_client().status()["last-round"]
         while _indexer_client().health()["round"] < algod_round:
-            time.sleep(1)
+            time.sleep(sleep_step)
 
         # Give the indexer a number of tries before raising an error
-        timeout = 0
+        timeout = 0.0
         while timeout < ConfigParams.indexer_timeout:
             try:
                 ret = func(*args, **kwargs)
                 break
             except IndexerHTTPError:
-                time.sleep(1)
-                timeout += 1
+                time.sleep(sleep_step)
+                timeout += sleep_step
         else:
             raise TimeoutError("Timeout reached waiting for indexer.")
 
@@ -131,6 +133,7 @@ def _wait_for_indexer(func: Callable) -> Callable:
 
 
 @_wait_for_indexer
+@lru_cache(maxsize=1)
 def _initial_funds_account() -> AlgoUser:
     """Get the account initially created by the sandbox.
 

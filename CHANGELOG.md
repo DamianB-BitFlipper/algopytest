@@ -23,6 +23,7 @@ straightforward as possible.
 - Renamed the ``group_elem`` function to a more generic ``txn_name`` since this function applies also to smart signatures and multi-signature transactions, not solely group transactions.
 - All transaction operations take all possible parameters, even the less commonly used ones.
 - The AlgoPytest API accepts ``AlgoUser`` as a user input anywhere whenever an address is requested.
+- Sped up the ``AlgoPytest`` test suite runtime by caching the ``_initial_funds_account``.
 
 ## [1.0.0] - 2022-02-09
 
