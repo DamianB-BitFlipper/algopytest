@@ -5,7 +5,7 @@ from algosdk import account
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
-from .entities import AlgoUser, MultisigAccount, NullUser
+from .entities import AlgoUser, MultisigAccount, _NullUser
 
 
 def transaction_boilerplate(
@@ -639,7 +639,7 @@ def payment_transaction(
     None
     """
     # Materialize the `close_remainder_to` to an `AlgoUser`
-    close_remainder_to = close_remainder_to or NullUser
+    close_remainder_to = close_remainder_to or _NullUser
 
     txn = algosdk_transaction.PaymentTxn(
         sender.address,
@@ -762,11 +762,11 @@ def update_asset(
     None
     """
     # When an optional account is `None`, it refers to
-    # the `NullUser` with an "" empty string address
-    manager = manager or NullUser
-    reserve = reserve or NullUser
-    freeze = freeze or NullUser
-    clawback = clawback or NullUser
+    # the `_NullUser` with an "" empty string address
+    manager = manager or _NullUser
+    reserve = reserve or _NullUser
+    freeze = freeze or _NullUser
+    clawback = clawback or _NullUser
 
     txn = algosdk_transaction.AssetUpdateTxn(
         sender.address,
@@ -843,8 +843,8 @@ def transfer_asset(
     None
     """
     # Materialize all of the optional arguments
-    close_assets_to = close_assets_to or NullUser
-    revocation_target = revocation_target or NullUser
+    close_assets_to = close_assets_to or _NullUser
+    revocation_target = revocation_target or _NullUser
 
     txn = algosdk_transaction.AssetTransferTxn(
         sender.address,
@@ -946,7 +946,7 @@ def smart_signature_transaction(
 ) -> Tuple[AlgoUser, algosdk_transaction.LogicSigTransaction]:
     """Write docs here: TODO!"""
     logic_txn = algosdk_transaction.LogicSigTransaction(txn, smart_signature)
-    return NullUser, logic_txn
+    return _NullUser, logic_txn
 
 
 class _MultisigTxn:
@@ -984,9 +984,9 @@ def multisig_transaction(
 ) -> Tuple[AlgoUser, _MultisigTxn]:
     """Write docs here: TODO!"""
     # The signers are specified in the `signing_accounts` list and are
-    # handled specially by the `_MultisigTxn` class. So return the `NullUser`
+    # handled specially by the `_MultisigTxn` class. So return the `_NullUser`
     # as the signer as a placeholder
-    return NullUser, _MultisigTxn(transaction, signing_accounts, multisig_account)
+    return _NullUser, _MultisigTxn(transaction, signing_accounts, multisig_account)
 
 
 class _GroupTxn:
@@ -1040,6 +1040,6 @@ def group_transaction(
 ) -> Tuple[AlgoUser, _GroupTxn]:
     """Write docs here: TODO!"""
     # The signers are already included as the first elements
-    # of the tuples in `transactions`, so return the `NullUser`
+    # of the tuples in `transactions`, so return the `_NullUser`
     # as the signer of this group transaction
-    return NullUser, _GroupTxn(list(transactions))
+    return _NullUser, _GroupTxn(list(transactions))
