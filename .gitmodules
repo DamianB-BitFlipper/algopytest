@@ -7,3 +7,6 @@
 [submodule "demos/algo-wizcoin"]
 	path = demos/algo-wizcoin
 	url = git@github.com:DamianB-BitFlipper/algo-wizcoin.git
+[submodule "demos/algo-quizzer"]
+	path = demos/algo-quizzer
+	url = git@github.com:DamianB-BitFlipper/algo-quizzer.git
