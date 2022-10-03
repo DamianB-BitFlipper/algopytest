@@ -88,6 +88,12 @@ jobs:
           export PYTHONPATH=$(pwd)/demos/algo-wizcoin/assets
           coverage run --append --source=algopytest -m pytest ./demos/algo-wizcoin/ -v --color=yes
 
+      - name: Test Algo-Quizzer Unittests
+        run: |
+          # So that algo-quizzer can be imported by the tests
+          export PYTHONPATH=$(pwd)/demos/algo-quizzer/assets
+          coverage run --append --source=algopytest -m pytest ./demos/algo-quizzer/ -v --color=yes
+
       - name: Generate the coverage report
         run: |
           coverage xml
