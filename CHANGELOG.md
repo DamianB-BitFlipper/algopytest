@@ -15,6 +15,7 @@ straightforward as possible.
 - Support multi-signature transaction with the ``multisig_transaction`` transaction operation.
 - Implemented a ``SmartContractAccount`` entity to hold the address of a smart contract as an ``AlgoUser``.
 - Utilize the ``KMD`` to access account private keys of the sandbox.
+- AlgoPytest user entities implement a ``name`` field for a more human-friendly debugging and logging experience
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
