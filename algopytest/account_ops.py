@@ -1,3 +1,5 @@
+from typing import Optional
+
 import algosdk
 
 from .client_ops import _initial_funds_account
@@ -6,10 +8,10 @@ from .transaction_ops import payment_transaction
 
 
 ## CREATING
-def add_standalone_account(funded: bool = True) -> AlgoUser:
+def add_standalone_account(funded: bool = True, name: Optional[str] = None) -> AlgoUser:
     """Create standalone account and return two-tuple of its private key and address."""
     private_key, address = algosdk.account.generate_account()
-    account = AlgoUser(address, private_key)
+    account = AlgoUser(address, private_key, name)
 
     if funded:
         fund_account(account)
