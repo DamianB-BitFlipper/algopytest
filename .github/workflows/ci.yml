@@ -66,6 +66,10 @@ jobs:
           export SANDBOX_DIR=$(pwd)/../sandbox
           export INITIAL_FUNDS_ACCOUNT=$(../sandbox/sandbox goal account list | awk '{print $3}' | head -n 1)          
 
+      - name: Test AlgoPytest Base Unittests
+        run: |
+          coverage run --source=algopytest -m pytest ./tests/ -v --color=yes
+
       - name: Test Algo-Recurring-Payments Unittests
         run: |
           # Unset the `INITIAL_FUNDS_ACCOUNT` to test the automatic account resolution
@@ -74,7 +78,7 @@ jobs:
 
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
-          coverage run --source=algopytest -m pytest ./demos/algo-recurring-payments/ -v --color=yes
+          coverage run --append --source=algopytest -m pytest ./demos/algo-recurring-payments/ -v --color=yes
 
           # Reset the `INITIAL_FUNDS_ACCOUNT`
           export INITIAL_FUNDS_ACCOUNT=$_INITIAL_FUNDS_ACCOUNT
