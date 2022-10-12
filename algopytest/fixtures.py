@@ -1,7 +1,7 @@
 # So that sphinx picks up on the type aliases
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, Optional
 
 import pytest
 from pyteal import Mode
@@ -25,7 +25,7 @@ def owner() -> YieldFixture[AlgoUser]:
     ------
     AlgoUser
     """
-    owner = add_standalone_account()
+    owner = add_standalone_account(name="owner")
 
     yield owner
 
@@ -43,7 +43,7 @@ def user1() -> YieldFixture[AlgoUser]:
     ------
     AlgoUser
     """
-    user = add_standalone_account()
+    user = add_standalone_account(name="user1")
 
     yield user
 
@@ -61,7 +61,7 @@ def user2() -> YieldFixture[AlgoUser]:
     ------
     AlgoUser
     """
-    user = add_standalone_account()
+    user = add_standalone_account(name="user2")
 
     yield user
 
@@ -79,7 +79,7 @@ def user3() -> YieldFixture[AlgoUser]:
     ------
     AlgoUser
     """
-    user = add_standalone_account()
+    user = add_standalone_account(name="user3")
 
     yield user
 
@@ -97,7 +97,7 @@ def user4() -> YieldFixture[AlgoUser]:
     ------
     AlgoUser
     """
-    user = add_standalone_account()
+    user = add_standalone_account(name="user4")
 
     yield user
 
@@ -133,8 +133,8 @@ def create_user() -> YieldFixture[Callable]:
     """
     created_users = []
 
-    def _create_user(funded: bool = True) -> AlgoUser:
-        user = add_standalone_account(funded=funded)
+    def _create_user(funded: bool = True, name: Optional[str] = None) -> AlgoUser:
+        user = add_standalone_account(funded=funded, name=name)
         created_users.append(user)
         return user
 
