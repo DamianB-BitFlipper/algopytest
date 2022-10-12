@@ -75,7 +75,7 @@ class MultisigAccount(AlgoUser):
 
     def __str__(self) -> str:
         if self.name:
-            str_identifier = self.name
+            str_identifier = f"'{self.name}'"
         else:
             str_identifier = ", ".join([str(owner) for owner in self._owner_accounts])
         return f"MultisigAccount({str_identifier})"
