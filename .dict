@@ -5,6 +5,7 @@ algosdk
 algouser
 functools
 getfixturevalue
+monkeypatch
 multisig
 openpty
 pathlib

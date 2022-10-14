@@ -12,6 +12,7 @@ def transaction_boilerplate(
     no_params: bool = False,
     no_send: bool = False,
     no_sign: bool = False,
+    with_txn_id: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
 ) -> Callable:
@@ -66,10 +67,10 @@ def transaction_boilerplate(
                 output_to_send = [output_to_send]
 
             # Send the transaction and await for confirmation
-            tx_id = process_transactions(output_to_send)
+            txn_id = process_transactions(output_to_send)
 
             # Display results
-            transaction_response = pending_transaction_info(tx_id)
+            transaction_response = pending_transaction_info(txn_id)
 
             if format_finish is not None:
                 log(
@@ -79,14 +80,41 @@ def transaction_boilerplate(
             else:
                 log(f"Finished {func.__name__}")
 
-            if return_fn is not None:
-                return return_fn(transaction_response)
+            ret = return_fn(transaction_response) if return_fn is not None else None
+
+            # Return the `txn_id` if requested
+            if decorator_args.get("__with_txn_id", with_txn_id):
+                return txn_id, ret
             else:
-                return None
+                return ret
 
         return wrapped
 
     return decorator
+
+
+def txn_elem(txn_factory: Callable) -> Callable:
+    """Add Doc String here: TODO!"""
+
+    def no_send_factory(
+        *args: Any, **kwargs: Any
+    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
+        # Disable signing and logging within the `txn_factory`
+        return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
+
+    return no_send_factory
+
+
+def with_txn_id(txn_factory: Callable) -> Callable:
+    """Add Doc String here: TODO!"""
+
+    def with_txn_id_factory(
+        *args: Any, **kwargs: Any
+    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
+        # Disable signing and logging within the `txn_factory`
+        return txn_factory(*args, __with_txn_id=True, **kwargs)
+
+    return with_txn_id_factory
 
 
 # The return type is `int` modified by `return_fn`
@@ -947,18 +975,6 @@ def close_out_asset(
         rekey_to=rekey_to.address,
     )
     return sender, txn
-
-
-def txn_elem(txn_factory: Callable) -> Callable:
-    """Add Doc String here: TODO!"""
-
-    def no_send_factory(
-        *args: Any, **kwargs: Any
-    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
-        # Disable signing and logging within the `txn_factory`
-        return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
-
-    return no_send_factory
 
 
 @transaction_boilerplate(

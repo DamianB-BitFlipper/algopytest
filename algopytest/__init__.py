@@ -32,6 +32,7 @@ from .client_ops import (
     asset_info,
     compile_program,
     suggested_params,
+    transaction_info,
 )
 from .entities import AlgoUser, MultisigAccount, SmartContractAccount
 from .smart_program_ops import deploy_smart_contract
@@ -55,6 +56,7 @@ from .transaction_ops import (
     txn_elem,
     update_app,
     update_asset,
+    with_txn_id,
 )
 
 # The functions to expose for sphinx documentation
@@ -86,6 +88,8 @@ __all__ = [
     "close_out_asset",
     "smart_signature_transaction",
     "txn_elem",
+    "with_txn_id",
     "group_transaction",
     "multisig_transaction",
+    "transaction_info",
 ]
