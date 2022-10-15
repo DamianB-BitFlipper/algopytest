@@ -5,9 +5,16 @@ Module containing helper functions for accessing Algorand blockchain.
 from __future__ import annotations
 
 import base64
+import sys
 import time
 from functools import lru_cache, wraps
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
+
+# The `ParamSpec` does not have native support before Python v3.10
+if sys.version_info < (3, 10):
+    from typing_extensions import ParamSpec
+else:
+    from typing import ParamSpec
 
 import pyteal
 from algosdk import mnemonic
@@ -21,6 +28,9 @@ from pyteal import Mode, compileTeal
 from .config_params import ConfigParams
 from .entities import AlgoUser
 from .utils import _convert_algo_dict
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 ## CLIENTS
@@ -93,13 +103,13 @@ def pending_transaction_info(transaction_id: int) -> dict[str, Any]:
 
 
 ## INDEXER RETRIEVAL
-def _wait_for_indexer(func: Callable) -> Callable:
+def _wait_for_indexer(func: Callable[P, T]) -> Callable[P, T]:
     """A decorator function to automatically wait for indexer timeout
     when running ``func``.
     """
     # To preserve the original type signature of `func` in the sphinx docs
     @wraps(func)
-    def wrapped(*args: Any, **kwargs: Any) -> Any:
+    def wrapped(*args: P.args, **kwargs: P.kwargs) -> T:
         sleep_step = 0.1
 
         # First wait for the indexer to catch up with the latest `algod_round`
@@ -109,15 +119,17 @@ def _wait_for_indexer(func: Callable) -> Callable:
 
         # Give the indexer a number of tries before raising an error
         timeout = 0.0
-        while timeout < ConfigParams.indexer_timeout:
+        while True:
             try:
                 ret = func(*args, **kwargs)
                 break
-            except IndexerHTTPError:
+            except IndexerHTTPError as e:
                 time.sleep(sleep_step)
                 timeout += sleep_step
-        else:
-            raise TimeoutError("Timeout reached waiting for indexer.")
+
+                # Once the timeout has been exhausted, re-raise the exception
+                if timeout >= ConfigParams.indexer_timeout:
+                    raise e
 
         return ret
 
@@ -160,7 +172,7 @@ def _initial_funds_account() -> AlgoUser:
 
 
 @_wait_for_indexer
-def transaction_info(transaction_id: int) -> dict[str, Any]:
+def transaction_info(transaction_id: str) -> dict[str, Any]:
     """Return transaction with provided ``transaction_id``."""
     return _indexer_client().transaction(transaction_id)
 

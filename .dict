@@ -6,6 +6,7 @@ algouser
 elems
 functools
 getfixturevalue
+monkeypatch
 multisig
 openpty
 pathlib

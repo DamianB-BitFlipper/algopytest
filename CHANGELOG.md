@@ -16,7 +16,8 @@ straightforward as possible.
 - Implemented a ``SmartContractAccount`` entity to hold the address of a smart contract as an ``AlgoUser``.
 - Utilize the ``KMD`` to access account private keys of the sandbox.
 - AlgoPytest user entities implement a ``name`` field for a more human-friendly debugging and logging experience
-- Implemented a ``TxnElemsContext`` context manager which alters the behavior of all transaction operations to return an unsent transaction object rather than send the transaction.
+- Implemented a ``TxnElemsContext`` context manager which alters all transaction operations to return an unsent transaction object rather than send the transaction.
+- Implemented a ``TxnIDContext`` context manager which alters all transaction operations to return the ``txn_id`` associated with the sent transaction.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8

@@ -24,9 +24,6 @@ def fund_account(
 ) -> None:
     """Fund the ``receiving_account`` with ``initial_funds`` amount of microAlgos."""
     initial_account = _initial_funds_account()
-    if initial_account is None:
-        raise RuntimeError("Initial funds were not transferred!")
-
     payment_transaction(
         initial_account,
         receiving_account,
@@ -38,9 +35,6 @@ def fund_account(
 def defund_account(defunding_account: AlgoUser) -> None:
     """Return the entire balance of ``defunding_account`` back to the ``initial_account``."""
     initial_account = _initial_funds_account()
-    if initial_account is None:
-        raise RuntimeError("Initial funds were not transferred!")
-
     payment_transaction(
         defunding_account,
         initial_account,

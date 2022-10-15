@@ -11,6 +11,7 @@ _no_log: Optional[bool] = None
 _no_params: Optional[bool] = None
 _no_send: Optional[bool] = None
 _no_sign: Optional[bool] = None
+_with_txn_id: Optional[bool] = None
 
 
 class TxnElemsContext:
@@ -29,11 +30,26 @@ class TxnElemsContext:
         _no_log = None
 
 
+class TxnIDContext:
+    def __enter__(self):
+        global _with_txn_id
+
+        # Globally enable `_with_txn_id`
+        _with_txn_id = True
+
+    def __exit__(self, etype, evalue, etraceback):
+        global _with_txn_id
+
+        # Disable any global modifiers
+        _with_txn_id = None
+
+
 def transaction_boilerplate(
     no_log: bool = False,
     no_params: bool = False,
     no_send: bool = False,
     no_sign: bool = False,
+    with_txn_id: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
 ) -> Callable:
@@ -49,6 +65,7 @@ def transaction_boilerplate(
             f_no_params = no_params if _no_params is None else _no_params
             f_no_send = no_send if _no_send is None else _no_send
             f_no_sign = no_sign if _no_sign is None else _no_sign
+            f_with_txn_id = with_txn_id if _with_txn_id is None else _with_txn_id
 
             # Pre-process the `decorator_args` and `kwargs` as necessary
             log: Callable[..., None] = print
@@ -86,10 +103,10 @@ def transaction_boilerplate(
                 output_to_send = [output_to_send]
 
             # Send the transaction and await for confirmation
-            tx_id = process_transactions(output_to_send)
+            txn_id = process_transactions(output_to_send)
 
             # Display results
-            transaction_response = pending_transaction_info(tx_id)
+            transaction_response = pending_transaction_info(txn_id)
 
             if format_finish is not None:
                 log(
@@ -99,10 +116,13 @@ def transaction_boilerplate(
             else:
                 log(f"Finished {func.__name__}")
 
-            if return_fn is not None:
-                return return_fn(transaction_response)
+            ret = return_fn(transaction_response) if return_fn is not None else None
+
+            # Return the `txn_id` if requested
+            if f_with_txn_id:
+                return txn_id, ret
             else:
-                return None
+                return ret
 
         return wrapped
 

@@ -32,11 +32,13 @@ from .client_ops import (
     asset_info,
     compile_program,
     suggested_params,
+    transaction_info,
 )
 from .entities import AlgoUser, MultisigAccount, SmartContractAccount
 from .smart_program_ops import deploy_smart_contract
 from .transaction_ops import (
     TxnElemsContext,
+    TxnIDContext,
     call_app,
     clear_app,
     close_out_app,
@@ -86,6 +88,8 @@ __all__ = [
     "close_out_asset",
     "smart_signature_transaction",
     "TxnElemsContext",
+    "TxnIDContext",
     "group_transaction",
     "multisig_transaction",
+    "transaction_info",
 ]
