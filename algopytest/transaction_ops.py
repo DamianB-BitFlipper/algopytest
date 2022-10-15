@@ -6,6 +6,43 @@ from algosdk.future import transaction as algosdk_transaction
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, MultisigAccount, _NullUser
 
+# Global variable switches controlled by context managers for the `transaction_boilerplate` decorator
+_no_log: Optional[bool] = None
+_no_params: Optional[bool] = None
+_no_send: Optional[bool] = None
+_no_sign: Optional[bool] = None
+_with_txn_id: Optional[bool] = None
+
+
+class TxnElemsContext:
+    def __enter__(self):
+        global _no_send, _no_log
+
+        # Globally disable sending and logging
+        _no_send = True
+        _no_log = True
+
+    def __exit__(self, etype, evalue, etraceback):
+        global _no_send, _no_log
+
+        # Disable any global modifiers
+        _no_send = None
+        _no_log = None
+
+
+class TxnIDContext:
+    def __enter__(self):
+        global _with_txn_id
+
+        # Globally enable `_with_txn_id`
+        _with_txn_id = True
+
+    def __exit__(self, etype, evalue, etraceback):
+        global _with_txn_id
+
+        # Disable any global modifiers
+        _with_txn_id = None
+
 
 def transaction_boilerplate(
     no_log: bool = False,
@@ -23,15 +60,16 @@ def transaction_boilerplate(
 
         @wraps(func)
         def wrapped(*args: Any, **kwargs: Any) -> Any:
-            # Filter all decorator arguments identified by `__` at the
-            # start and remove them from the `kwargs`
-            decorator_args = {k: v for k, v in kwargs.items() if k.startswith("__")}
-            for decorator_key in decorator_args:
-                del kwargs[decorator_key]
+            # Apply the global modifiers if any are set
+            f_no_log = no_log if _no_log is None else _no_log
+            f_no_params = no_params if _no_params is None else _no_params
+            f_no_send = no_send if _no_send is None else _no_send
+            f_no_sign = no_sign if _no_sign is None else _no_sign
+            f_with_txn_id = with_txn_id if _with_txn_id is None else _with_txn_id
 
             # Pre-process the `decorator_args` and `kwargs` as necessary
             log: Callable[..., None] = print
-            if decorator_args.get("__no_log", no_log):
+            if f_no_log:
                 # Disable logging
                 def ignore(*args: Any) -> None:
                     return None
@@ -40,9 +78,7 @@ def transaction_boilerplate(
 
             # If `params` was not supplied, insert the suggested
             # parameters unless disabled by `no_params`
-            if kwargs.get("params", None) is None and not decorator_args.get(
-                "__no_params", no_params
-            ):
+            if kwargs.get("params") is None and not f_no_params:
                 kwargs["params"] = suggested_params(flat_fee=True, fee=1000)
 
             log(f"Running {func.__name__}")
@@ -51,10 +87,10 @@ def transaction_boilerplate(
             signer, txn = func(*args, **kwargs)
 
             # Return the `signer` and `txn` if no sending was requested
-            if decorator_args.get("__no_send", no_send):
+            if f_no_send:
                 return signer, txn
 
-            if decorator_args.get("__no_sign", no_sign):
+            if f_no_sign:
                 # Send the `txn` as is
                 output_to_send = txn
             else:
@@ -83,7 +119,7 @@ def transaction_boilerplate(
             ret = return_fn(transaction_response) if return_fn is not None else None
 
             # Return the `txn_id` if requested
-            if decorator_args.get("__with_txn_id", with_txn_id):
+            if f_with_txn_id:
                 return txn_id, ret
             else:
                 return ret
@@ -91,30 +127,6 @@ def transaction_boilerplate(
         return wrapped
 
     return decorator
-
-
-def txn_elem(txn_factory: Callable) -> Callable:
-    """Add Doc String here: TODO!"""
-
-    def no_send_factory(
-        *args: Any, **kwargs: Any
-    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
-        # Disable signing and logging within the `txn_factory`
-        return txn_factory(*args, __no_send=True, __no_log=True, **kwargs)
-
-    return no_send_factory
-
-
-def with_txn_id(txn_factory: Callable) -> Callable:
-    """Add Doc String here: TODO!"""
-
-    def with_txn_id_factory(
-        *args: Any, **kwargs: Any
-    ) -> Tuple[AlgoUser, algosdk_transaction.Transaction]:
-        # Disable signing and logging within the `txn_factory`
-        return txn_factory(*args, __with_txn_id=True, **kwargs)
-
-    return with_txn_id_factory
 
 
 # The return type is `int` modified by `return_fn`
