@@ -3,6 +3,7 @@ algod
 algopytest
 algosdk
 algouser
+elems
 functools
 getfixturevalue
 multisig
@@ -51,6 +52,9 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 FILEID: 05df82f8-2185-11ed-bb27-e4b318472d90
 apid
 caid
+etraceback
+etype
+evalue
 faid
 xaid
 
