@@ -50,15 +50,9 @@ def transaction_boilerplate(
             f_no_send = no_send if _no_send is None else _no_send
             f_no_sign = no_sign if _no_sign is None else _no_sign
 
-            # Filter all decorator arguments identified by `_` at the
-            # start and remove them from the `kwargs`
-            decorator_args = {k: v for k, v in kwargs.items() if k.startswith("_")}
-            for decorator_key in decorator_args:
-                del kwargs[decorator_key]
-
             # Pre-process the `decorator_args` and `kwargs` as necessary
             log: Callable[..., None] = print
-            if decorator_args.get("_no_log", f_no_log):
+            if f_no_log:
                 # Disable logging
                 def ignore(*args: Any) -> None:
                     return None
@@ -67,9 +61,7 @@ def transaction_boilerplate(
 
             # If `params` was not supplied, insert the suggested
             # parameters unless disabled by `no_params`
-            if kwargs.get("params") is None and not decorator_args.get(
-                "_no_params", f_no_params
-            ):
+            if kwargs.get("params") is None and not f_no_params:
                 kwargs["params"] = suggested_params(flat_fee=True, fee=1000)
 
             log(f"Running {func.__name__}")
@@ -78,10 +70,10 @@ def transaction_boilerplate(
             signer, txn = func(*args, **kwargs)
 
             # Return the `signer` and `txn` if no sending was requested
-            if decorator_args.get("_no_send", f_no_send):
+            if f_no_send:
                 return signer, txn
 
-            if decorator_args.get("_no_sign", f_no_sign):
+            if f_no_sign:
                 # Send the `txn` as is
                 output_to_send = txn
             else:
