@@ -994,12 +994,12 @@ def close_out_asset(
 )
 def smart_signature_transaction(
     smart_signature: bytes,
-    txn: algosdk_transaction.Transaction,
+    transaction: Tuple[AlgoUser, algosdk_transaction.Transaction],
     *,
     params: Optional[algosdk_transaction.SuggestedParams],
 ) -> Tuple[AlgoUser, algosdk_transaction.LogicSigTransaction]:
     """Write docs here: TODO!"""
-    logic_txn = algosdk_transaction.LogicSigTransaction(txn, smart_signature)
+    logic_txn = algosdk_transaction.LogicSigTransaction(transaction[1], smart_signature)
     return _NullUser, logic_txn
 
 
