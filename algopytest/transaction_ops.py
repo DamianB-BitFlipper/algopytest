@@ -45,6 +45,8 @@ class TxnIDContext:
         _with_txn_id = None
 
 
+# TODO!!! Replace Tuple[AlgoUser, Any] with something more representable of what the transaction ops return
+# even though in end effect, it will be the same. It will look cleaner in this code.
 def transaction_boilerplate(
     no_log: bool = False,
     no_params: bool = False,
