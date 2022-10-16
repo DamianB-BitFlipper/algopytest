@@ -22,5 +22,8 @@
   ],
   "13ba44e0-4a6f-11ed-9e9b-e4b318472d90": [
     "tests/test_entities.py"
+  ],
+  "f1703cae-4d67-11ed-b63d-e4b318472d90": [
+    "tests/test_utils.py"
   ]
 }

@@ -76,6 +76,9 @@ jobs:
           export _INITIAL_FUNDS_ACCOUNT=$INITIAL_FUNDS_ACCOUNT
           unset INITIAL_FUNDS_ACCOUNT
 
+          # Manually set the `INDEXER_TIMEOUT`
+          export INDEXER_TIMEOUT=30 
+
           # So that algo-recurring-payments can be imported by the tests
           export PYTHONPATH=$(pwd)/demos/algo-recurring-payments/assets
           coverage run --append --source=algopytest -m pytest ./demos/algo-recurring-payments/ -v --color=yes
@@ -83,6 +86,9 @@ jobs:
           # Reset the `INITIAL_FUNDS_ACCOUNT`
           export INITIAL_FUNDS_ACCOUNT=$_INITIAL_FUNDS_ACCOUNT
           unset _INITIAL_FUNDS_ACCOUNT
+
+          # Unset the `INDEXER_TIMEOUT`
+          unset INDEXER_TIMEOUT
 
       - name: Test Algo-Diploma Unittests
         run: |
