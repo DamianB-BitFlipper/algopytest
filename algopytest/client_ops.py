@@ -5,16 +5,9 @@ Module containing helper functions for accessing Algorand blockchain.
 from __future__ import annotations
 
 import base64
-import sys
 import time
 from functools import lru_cache, wraps
-from typing import Any, Callable, Dict, Optional, TypeVar
-
-# The `ParamSpec` does not have native support before Python v3.10
-if sys.version_info < (3, 10):
-    from typing_extensions import ParamSpec
-else:
-    from typing import ParamSpec
+from typing import Any, Callable, Dict, Optional
 
 import pyteal
 from algosdk import mnemonic
@@ -27,10 +20,8 @@ from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
+from .type_stubs import P, T
 from .utils import _convert_algo_dict
-
-P = ParamSpec("P")
-T = TypeVar("T")
 
 
 ## CLIENTS

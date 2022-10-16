@@ -1,12 +1,11 @@
 from functools import wraps
-from typing import Any, Callable, List, Optional, ParamSpec, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, MultisigAccount, _NullUser
-
-P = ParamSpec("P")
+from .type_stubs import P
 
 # Global variable switches controlled by context managers for the `transaction_boilerplate` decorator
 _no_log: Optional[bool] = None
