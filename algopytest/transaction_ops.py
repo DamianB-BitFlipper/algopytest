@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 from typing import Any, Callable, List, Optional, Tuple, Union
 
@@ -70,8 +71,10 @@ def transaction_boilerplate(
             f_no_sign = no_sign if _no_sign is None else _no_sign
             f_with_txn_id = with_txn_id if _with_txn_id is None else _with_txn_id
 
-            # Pre-process the `decorator_args` and `kwargs` as necessary
-            log: Callable[..., None] = print
+            logger = logging.getLogger("algopytest")
+            logger.setLevel(logging.INFO)
+
+            log: Callable[..., None] = logger.info
             if f_no_log:
                 # Disable logging
                 def ignore(*args: Any) -> None:
@@ -113,8 +116,7 @@ def transaction_boilerplate(
 
             if format_finish is not None:
                 log(
-                    f"Finished {func.__name__} with: ",
-                    format_finish(transaction_response),
+                    f"Finished {func.__name__} with: {format_finish(transaction_response)}"
                 )
             else:
                 log(f"Finished {func.__name__}")
