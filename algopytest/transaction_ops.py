@@ -1,10 +1,12 @@
 from functools import wraps
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, ParamSpec, Tuple, Union
 
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, MultisigAccount, _NullUser
+
+P = ParamSpec("P")
 
 # Global variable switches controlled by context managers for the `transaction_boilerplate` decorator
 _no_log: Optional[bool] = None
@@ -52,14 +54,14 @@ def transaction_boilerplate(
     with_txn_id: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
-) -> Callable:
+) -> Callable[[Callable[P, Tuple[AlgoUser, Any]]], Callable[P, Any]]:
     """A decorator to handle all of the transaction boilerplate."""
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[P, Tuple[AlgoUser, Any]]) -> Callable[P, Any]:
         """The actual decorator since it takes the arguments above."""
 
         @wraps(func)
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
+        def wrapped(*args: P.args, **kwargs: P.kwargs) -> Any:
             # Apply the global modifiers if any are set
             f_no_log = no_log if _no_log is None else _no_log
             f_no_params = no_params if _no_params is None else _no_params
@@ -141,7 +143,7 @@ def create_app(
     global_schema: algosdk_transaction.StateSchema,
     local_schema: algosdk_transaction.StateSchema,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -230,7 +232,7 @@ def delete_app(
     owner: AlgoUser,
     app_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -301,7 +303,7 @@ def update_app(
     approval_compiled: bytes,
     clear_compiled: bytes,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -377,7 +379,7 @@ def opt_in_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -446,7 +448,7 @@ def close_out_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -515,7 +517,7 @@ def clear_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -584,7 +586,7 @@ def call_app(
     sender: AlgoUser,
     app_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -652,7 +654,7 @@ def payment_transaction(
     receiver: AlgoUser,
     amount: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     close_remainder_to: Optional[AlgoUser] = None,
     note: str = "",
     lease: str = "",
@@ -717,7 +719,7 @@ def create_asset(
     unit_name: str,
     default_frozen: bool,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     url: str = "",
     metadata_hash: str = "",
     note: str = "",
@@ -763,7 +765,7 @@ def destroy_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     note: str = "",
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
@@ -797,11 +799,11 @@ def update_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
     manager: Optional[AlgoUser],
     reserve: Optional[AlgoUser],
     freeze: Optional[AlgoUser],
     clawback: Optional[AlgoUser],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     note: str = "",
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
@@ -846,7 +848,7 @@ def freeze_asset(
     new_freeze_state: bool,
     asset_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     note: str = "",
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
@@ -884,7 +886,7 @@ def transfer_asset(
     amount: int,
     asset_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     close_assets_to: Optional[AlgoUser] = None,
     revocation_target: Optional[AlgoUser] = None,
     note: str = "",
@@ -926,7 +928,7 @@ def opt_in_asset(
     sender: AlgoUser,
     asset_id: int,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     note: str = "",
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
@@ -961,7 +963,7 @@ def close_out_asset(
     asset_id: int,
     receiver: AlgoUser,
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
     note: str = "",
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
@@ -996,7 +998,7 @@ def smart_signature_transaction(
     smart_signature: bytes,
     transaction: Tuple[AlgoUser, algosdk_transaction.Transaction],
     *,
-    params: Optional[algosdk_transaction.SuggestedParams],
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
 ) -> Tuple[AlgoUser, algosdk_transaction.LogicSigTransaction]:
     """Write docs here: TODO!"""
     logic_txn = algosdk_transaction.LogicSigTransaction(transaction[1], smart_signature)
