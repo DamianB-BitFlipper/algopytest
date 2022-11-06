@@ -1,12 +1,13 @@
 import logging
 from functools import wraps
+from types import TracebackType
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 from algosdk.future import transaction as algosdk_transaction
 
 from .client_ops import pending_transaction_info, process_transactions, suggested_params
 from .entities import AlgoUser, MultisigAccount, _NullUser
-from .type_stubs import P
+from .type_stubs import P, TransactionT
 
 # Global variable switches controlled by context managers for the `transaction_boilerplate` decorator
 _no_log: Optional[bool] = None
@@ -17,14 +18,19 @@ _with_txn_id: Optional[bool] = None
 
 
 class TxnElemsContext:
-    def __enter__(self):
+    def __enter__(self) -> None:
         global _no_send, _no_log
 
         # Globally disable sending and logging
         _no_send = True
         _no_log = True
 
-    def __exit__(self, etype, evalue, etraceback):
+    def __exit__(
+        self,
+        etype: Optional[type[BaseException]],
+        evalue: Optional[BaseException],
+        etraceback: Optional[TracebackType],
+    ) -> None:
         global _no_send, _no_log
 
         # Disable any global modifiers
@@ -33,21 +39,24 @@ class TxnElemsContext:
 
 
 class TxnIDContext:
-    def __enter__(self):
+    def __enter__(self) -> None:
         global _with_txn_id
 
         # Globally enable `_with_txn_id`
         _with_txn_id = True
 
-    def __exit__(self, etype, evalue, etraceback):
+    def __exit__(
+        self,
+        etype: Optional[type[BaseException]],
+        evalue: Optional[BaseException],
+        etraceback: Optional[TracebackType],
+    ) -> None:
         global _with_txn_id
 
         # Disable any global modifiers
         _with_txn_id = None
 
 
-# TODO!!! Replace Tuple[AlgoUser, Any] with something more representable of what the transaction ops return
-# even though in end effect, it will be the same. It will look cleaner in this code.
 def transaction_boilerplate(
     no_log: bool = False,
     no_params: bool = False,
@@ -56,10 +65,10 @@ def transaction_boilerplate(
     with_txn_id: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
-) -> Callable[[Callable[P, Tuple[AlgoUser, Any]]], Callable[P, Any]]:
+) -> Callable[[Callable[P, Tuple[AlgoUser, TransactionT]]], Callable[P, Any]]:
     """A decorator to handle all of the transaction boilerplate."""
 
-    def decorator(func: Callable[P, Tuple[AlgoUser, Any]]) -> Callable[P, Any]:
+    def decorator(func: Callable[P, Tuple[AlgoUser, TransactionT]]) -> Callable[P, Any]:
         """The actual decorator since it takes the arguments above."""
 
         @wraps(func)

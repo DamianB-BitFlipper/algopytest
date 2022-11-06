@@ -20,7 +20,7 @@ from pyteal import Mode, compileTeal
 
 from .config_params import ConfigParams
 from .entities import AlgoUser
-from .type_stubs import P, T
+from .type_stubs import P, T, TransactionT
 from .utils import _convert_algo_dict
 
 
@@ -66,7 +66,7 @@ def _get_kmd_account_private_key(address: str) -> str:
 
 
 ## TRANSACTIONS
-def process_transactions(transactions: list[algosdk_transaction.Transaction]) -> int:
+def process_transactions(transactions: list[TransactionT]) -> int:
     """Send provided grouped ``transactions`` to network and wait for confirmation."""
     client = _algod_client()
     transaction_id = client.send_transactions(transactions)
