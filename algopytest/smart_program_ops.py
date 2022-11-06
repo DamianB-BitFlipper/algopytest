@@ -40,12 +40,12 @@ def deploy_smart_contract(
     global_bytes: int = 0,
     *,
     app_args: Optional[List[Union[str, int]]] = None,
-    accounts: Optional[List[str]] = None,
+    accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
     foreign_assets: Optional[List[int]] = None,
     note: str = "",
     lease: str = "",
-    rekey_to: str = "",
+    rekey_to: Optional[AlgoUser] = None,
     extra_pages: int = 0,
 ) -> DeployedSmartContract:
     approval_compiled = compile_program(approval_program, Mode.Application, version)
