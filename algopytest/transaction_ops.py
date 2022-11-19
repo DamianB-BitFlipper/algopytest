@@ -86,7 +86,30 @@ class DeployedAppID(int):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> typing_extensions.Literal[False]:
-        delete_app(self.owner, self)
+        delete_app(self.owner, app_id=self)
+        return False
+
+
+class DeployedAssetID(int):
+    """Subclass the `int` so that it can be used as a context manager or directly."""
+
+    owner: AlgoUser
+
+    def __new__(cls, asset_id: int, owner: AlgoUser):
+        _asset_id = int.__new__(cls, asset_id)
+        _asset_id.owner = owner
+        return _asset_id
+
+    def __enter__(self) -> int:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> typing_extensions.Literal[False]:
+        destroy_asset(self.owner, asset_id=self)
         return False
 
 
@@ -253,7 +276,7 @@ def create_compiled_app(
         extra_pages=extra_pages,
     )
 
-    # Return a int sub-classed context manager
+    # Return an int sub-classed context manager for the application
     return DeployedAppID(app_id, owner)
 
 
@@ -829,11 +852,53 @@ def payment_transaction(
     return sender, txn
 
 
+def create_asset(
+    sender: AlgoUser,
+    manager: AlgoUser,
+    reserve: AlgoUser,
+    freeze: AlgoUser,
+    clawback: AlgoUser,
+    asset_name: str,
+    total: int,
+    decimals: int,
+    unit_name: str,
+    default_frozen: bool,
+    *,
+    params: Optional[algosdk_transaction.SuggestedParams] = None,
+    url: str = "",
+    metadata_hash: str = "",
+    note: str = "",
+    lease: str = "",
+    rekey_to: Optional[AlgoUser] = None,
+) -> int:
+    # Create the asset
+    asset_id = _create_asset(
+        sender=sender,
+        manager=manager,
+        reserve=reserve,
+        freeze=freeze,
+        clawback=clawback,
+        asset_name=asset_name,
+        total=total,
+        decimals=decimals,
+        unit_name=unit_name,
+        default_frozen=default_frozen,
+        url=url,
+        metadata_hash=metadata_hash,
+        note=note,
+        lease=lease,
+        rekey_to=rekey_to,
+    )
+
+    # Return an int sub-classed context manager for the asset
+    return DeployedAssetID(asset_id, sender)
+
+
 @transaction_boilerplate(
     format_finish=lambda txninfo: f'asset-id={txninfo["asset-index"]}',
     return_fn=lambda txninfo: txninfo["asset-index"],
 )
-def create_asset(
+def _create_asset(
     sender: AlgoUser,
     manager: AlgoUser,
     reserve: AlgoUser,
