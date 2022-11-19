@@ -93,11 +93,11 @@ class DeployedAppID(int):
 class DeployedAssetID(int):
     """Subclass the `int` so that it can be used as a context manager or directly."""
 
-    owner: AlgoUser
+    sender: AlgoUser
 
-    def __new__(cls, asset_id: int, owner: AlgoUser):
+    def __new__(cls, asset_id: int, sender: AlgoUser):
         _asset_id = int.__new__(cls, asset_id)
-        _asset_id.owner = owner
+        _asset_id.sender = sender
         return _asset_id
 
     def __enter__(self) -> int:
@@ -109,7 +109,7 @@ class DeployedAssetID(int):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> typing_extensions.Literal[False]:
-        destroy_asset(self.owner, asset_id=self)
+        destroy_asset(self.sender, asset_id=self)
         return False
 
 
