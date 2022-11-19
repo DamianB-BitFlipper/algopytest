@@ -11,13 +11,18 @@ from .entities import AlgoUser
 from .transaction_ops import create_app, delete_app
 
 
-class DeployedSmartContract:
-    def __init__(self, owner: AlgoUser, app_id: int):
-        self.owner = owner
-        self.app_id = app_id
+class DeployedSmartContractID(int):
+    """Subclass the `int` so that it can be used as a context manager or directly."""
+
+    owner: AlgoUser
+
+    def __new__(cls, app_id: int, owner: AlgoUser):
+        _app_id = int.__new__(cls, app_id)
+        _app_id.owner = owner
+        return _app_id
 
     def __enter__(self) -> int:
-        return self.app_id
+        return self
 
     def __exit__(
         self,
@@ -25,7 +30,7 @@ class DeployedSmartContract:
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> typing_extensions.Literal[False]:
-        delete_app(self.owner, self.app_id)
+        delete_app(self.owner, self)
         return False
 
 
@@ -47,7 +52,7 @@ def deploy_smart_contract(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
     extra_pages: int = 0,
-) -> DeployedSmartContract:
+) -> int:
     approval_compiled = compile_program(approval_program, Mode.Application, version)
     clear_compiled = compile_program(clear_program, Mode.Application, version)
     global_schema = algosdk_transaction.StateSchema(global_ints, global_bytes)
@@ -70,4 +75,4 @@ def deploy_smart_contract(
         extra_pages=extra_pages,
     )
 
-    return DeployedSmartContract(owner, app_id)
+    return DeployedSmartContractID(app_id, owner)

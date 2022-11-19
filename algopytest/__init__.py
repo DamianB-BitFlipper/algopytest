@@ -35,7 +35,6 @@ from .client_ops import (
     transaction_info,
 )
 from .entities import AlgoUser, MultisigAccount, SmartContractAccount
-from .smart_program_ops import deploy_smart_contract
 from .transaction_ops import (
     TxnElemsContext,
     TxnIDContext,
@@ -45,6 +44,7 @@ from .transaction_ops import (
     close_out_asset,
     create_app,
     create_asset,
+    create_compiled_app,
     delete_app,
     destroy_asset,
     freeze_asset,
@@ -64,7 +64,6 @@ __all__ = [
     "AlgoUser",
     "SmartContractAccount",
     "MultisigAccount",
-    "deploy_smart_contract",
     "account_balance",
     "asset_balance",
     "application_global_state",
@@ -72,6 +71,7 @@ __all__ = [
     "compile_program",
     "suggested_params",
     "create_app",
+    "create_compiled_app",
     "delete_app",
     "update_app",
     "opt_in_app",
