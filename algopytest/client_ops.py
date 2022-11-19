@@ -216,7 +216,7 @@ def application_local_state(
     # Use get to index `account` since it may not have any local states yet
     ret = {}
     for local_state in account_data.get("apps-local-state", []):
-        if local_state["id"] == app_id:
+        if local_state["id"] == app_id and "key-value" in local_state:
             ret = _convert_algo_dict(local_state["key-value"], address_fields)
             break
 

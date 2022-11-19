@@ -21,6 +21,7 @@ straightforward as possible.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
+- The ``application_local_state`` no longer fails when attempting to read a deleted local field.
 
 ### Other Changes
 - Inputs which accept ``PyTEAL`` directly take the ``pyteal.Expr`` and not a function which generates a ``pyteal.Expr``
