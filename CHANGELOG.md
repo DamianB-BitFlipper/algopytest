@@ -19,6 +19,7 @@ straightforward as possible.
 - Implemented a ``TxnElemsContext`` context manager which alters all transaction operations to return an unsent transaction object rather than send the transaction.
 - Implemented a ``TxnIDContext`` context manager which alters all transaction operations to return the ``txn_id`` associated with the sent transaction.
 - Functions ``create_app`` and ``create_compiled_app`` are int sub-classed context managers that may be used in a ``with`` clause or cleaned up manually with ``delete_app``.
+- Function ``create_asset`` returns an int sub-classed context manager that can handle clean up within a ``with`` clause.
 
 ### Bug Fixes
 - Removed typing subscripts to be compatible with Python 3.8
