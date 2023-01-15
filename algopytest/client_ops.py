@@ -9,12 +9,12 @@ import time
 from functools import lru_cache, wraps
 from typing import Any, Callable, Dict, Optional
 
+import algosdk.transaction
 import pyteal
 from algosdk import mnemonic
 from algosdk.error import IndexerHTTPError
-from algosdk.future import transaction as algosdk_transaction
-from algosdk.future.transaction import LogicSig, PaymentTxn, wait_for_confirmation
 from algosdk.kmd import KMDClient
+from algosdk.transaction import LogicSig, PaymentTxn, wait_for_confirmation
 from algosdk.v2client import algod, indexer
 from pyteal import Mode, compileTeal
 
@@ -74,7 +74,7 @@ def process_transactions(transactions: list[TransactionT]) -> int:
     return transaction_id
 
 
-def suggested_params(**kwargs: Any) -> algosdk_transaction.SuggestedParams:
+def suggested_params(**kwargs: Any) -> algosdk.transaction.SuggestedParams:
     """Return the suggested params from the algod client.
 
     Set the provided attributes in ``kwargs`` in the suggested parameters.
