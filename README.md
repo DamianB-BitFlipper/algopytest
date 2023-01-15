@@ -49,6 +49,7 @@ Create a `conftest.py` file in your Pytest `tests` directory and define a fixtur
 
 ```python
 # File: conftest.py
+import pytest
 from algopytest import create_app
 
 # Load the smart contracts from this project. The path to find these
@@ -59,7 +60,7 @@ from clear_program import clear_program
 
 # NOTE: It is critical to `yield` the `app_id` so that the clean up is properly performed.
 # The `owner` is an automatically available AlgoPytest defined fixture 
-@fixture
+@pytest.fixture
 def smart_contract_id(owner):
     with create_app(
             owner,
@@ -150,6 +151,7 @@ smart-contract-project/
 
 ```python
 # File: conftest.py
+import pytest
 from algopytest import create_app
 
 # Load the smart contracts from this project. The path to find these
@@ -160,7 +162,7 @@ from clear_program import clear_program
 
 # NOTE: It is critical to `yield` the `app_id` so that the clean up is properly performed.
 # The `owner` is an automatically available AlgoPytest defined fixture
-@fixture
+@pytest.fixture
 def smart_contract_id(owner):
     with create_app(
             owner,
