@@ -15,5 +15,5 @@ dependencies:
   - typing_extensions
   - pip:
     - py-algorand-sdk
-    - pyteal
+    - pyteal<=0.13.0
     - scspell3k
