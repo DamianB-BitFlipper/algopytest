@@ -45,11 +45,12 @@ export INITIAL_FUNDS_ACCOUNT=4BJAN3J32NDMZJWU3DPIPGCPBQIUTXL3UB2LEG5Z3CFPRJZOOZC
 - List of environment variables recognized by *AlgoPytest*: [documentation](https://algopytest.readthedocs.io/en/latest/configuration.html).
 
 ----
-Create a `conftest.py` file in your Pytest `tests` directory and initialize *AlgoPytest* within as so:
+Create a `conftest.py` file in your Pytest `tests` directory and define a fixture deploying a smart contract as so:
 
 ```python
 # File: conftest.py
-from algopytest import initialize
+import pytest
+from algopytest import create_app
 
 # Load the smart contracts from this project. The path to find these
 # imports can be set by the environment variable `$PYTHONPATH`.
@@ -57,20 +58,27 @@ from algopytest import initialize
 from approval_program import approval_program
 from clear_program import clear_program
 
-def pytest_configure(config):
-    """Initialize algopytest before the pytest tests run."""
-    initialize(approval_program=approval_program, 
-               clear_program=clear_program,
-               local_ints=0, local_bytes=1, 
-               global_ints=0, global_bytes=1)
+# NOTE: It is critical to `yield` the `app_id` so that the clean up is properly performed.
+# The `owner` is an automatically available AlgoPytest defined fixture 
+@pytest.fixture
+def smart_contract_id(owner):
+    with create_app(
+            owner,
+            approval_program=diploma_program(), 
+            clear_program=clear_program(),
+            local_bytes=1,
+            local_ints=1,
+            global_bytes=1,        
+    ) as app_id:
+        yield app_id
 ```
 
-Now, any Pytest tests you write automatically have access to the *AlgoPytest* fixtures. Additionally, you can import and utilize the various helper functions that ship with the framework.
+Now, any Pytest tests you write automatically have access to the standard *AlgoPytest* fixtures as well as your defined `smart_contract_id`. Additionally, you can import and utilize the various helper functions that ship with the framework.
 
 - List of available fixtures: [documentation](https://algopytest.readthedocs.io/en/latest/fixtures.html)
 - Provided helper functions: [documentation](https://algopytest.readthedocs.io/en/latest/algopytest.html)
 ----
-A simple test to make sure that the creator of the smart contract can update the application is provided below. It uses the *AlgoPytest* fixtures `owner` and `smart_contract_id` and the helper function `update_app`.
+A simple test to make sure that the creator of the smart contract can update the application is provided below. It uses the *AlgoPytest* fixture `owner`, your defined `smart_contract_id` fixture and the helper function `update_app`.
 
 ```python
 # File: test_behavior.py
@@ -124,10 +132,10 @@ Original source may be found [here](https://github.com/DamianB-BitFlipper/algo-d
 ## Detailed Usage
 Refer to the [Documentation References](#documentation-references) below for more specific explanations of key topics.
 
-### AlgoPytest Initialization
+### AlgoPytest Setup
 Firstly, you must follow the Pytest directory structure. Essentially, all tests will be found within a `tests` directory in the root of your project.
 
-Before being able to write Pytest tests for your Algorand Smart Contract, you need to initialize the *AlgoPytest* plugin. Before any Pytest tests run, you must declare to *AlgoPytest* the smart contract code to be tested as well as its storage requirements. This is most easily achieved by creating a `conftest.py` file and calling `algopytest.initialize`from within a function named `pytest_configure`. Pytest understands `pytest_configure` and will execute the function before any tests run.
+Before being able to write Pytest tests for your Algorand Smart Contract, you will need to initialize some essential fixtures such as the smart contracts, signatures, and assets to be tested. Utility functions are provided by *AlgoPytest* which deploy these objects and return a reference to be used in a fixture. For a smart contract, this is most easily achieved by creating a `conftest.py` file and yielding the result of `algopytest.create_app` from within a fixture. It is critical to `yield` rather than `return` to not interfere with the *AlgoPytest* fixture clean up sequence.
 
 For example:
 ```bash
@@ -143,7 +151,8 @@ smart-contract-project/
 
 ```python
 # File: conftest.py
-from algopytest import initialize
+import pytest
+from algopytest import create_app
 
 # Load the smart contracts from this project. The path to find these
 # imports can be set by the environment variable `$PYTHONPATH`.
@@ -151,12 +160,19 @@ from algopytest import initialize
 from approval_program import approval_program
 from clear_program import clear_program
 
-def pytest_configure(config):
-    """Initialize algopytest before the pytest tests run."""
-    initialize(approval_program=approval_program, 
-               clear_program=clear_program,
-               local_ints=0, local_bytes=1, 
-               global_ints=0, global_bytes=1)
+# NOTE: It is critical to `yield` the `app_id` so that the clean up is properly performed.
+# The `owner` is an automatically available AlgoPytest defined fixture
+@pytest.fixture
+def smart_contract_id(owner):
+    with create_app(
+            owner,
+            approval_program=diploma_program(), 
+            clear_program=clear_program(),
+            local_bytes=1,
+            local_ints=1,
+            global_bytes=1,        
+    ) as app_id:
+        yield app_id
 ```
 
 The `approval_program` and `clear_program` must be Python functions which return a `pyteal.Expr`. 
@@ -173,12 +189,14 @@ def clear_program():
 
 The *AlgoPytest* package is written as a Pytest plugin. This allows *AlgoPytest* to automatically register fixtures without you needing to import anything.  You may simply use the fixtures directly in the function signature.
 
-These fixtures make testing Algorand Smart Contracts significantly easier for you as the developer. Fixtures such as the user ones: `owner`, `user1`, `user2`, etc. automatically create users with funded balances and cleans them up at the end of the test. The `smart_contract_id` fixture automatically deploys (and cleans up) the smart contract supplied to the `initialize` function above with `owner` as its creator. Before, writing a test even as simple as checking that the owner of an application can update their application, required non-negligible boilerplate code. Now, in order to write this test, all of the necessary boilerplate code is taken care of; you only have to focus only on the testing code at hand and nothing else.
+These fixtures make testing Algorand Smart Contracts significantly easier for you as the developer. Fixtures such as the user ones: `owner`, `user1`, `user2`, etc. automatically create users with funded balances and cleans them up at the end of the test. Any smart contracts, signatures and assets yielded as fixtures are automatically deployed over the life of the test and then cleaned up. Without *AlgoPytest*, writing a test even as simple as checking whether the owner of an application can update their application requires non-negligible boilerplate code. Now, in order to write this test, all of the necessary boilerplate code is taken care of; you only have to focus only on the testing code at hand and nothing else.
 
 ```python
 # File: test_behavior.py
 def test_update_from_owner(owner, smart_contract_id):
-    "The `owner` and `smart_contract_id` are AlgoPytest fixtures."
+    """The `owner` and `smart_contract_id` are AlgoPytest fixtures.
+    
+    This call will raise if there is any error."""
     update_app(owner, smart_contract_id)
 ```
 
