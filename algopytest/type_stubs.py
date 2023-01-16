@@ -1,7 +1,7 @@
 import sys
 from typing import TYPE_CHECKING, Generator, TypeVar, Union
 
-from algosdk.future import transaction as algosdk_transaction
+import algosdk.transaction
 
 # The `ParamSpec` does not have native support before Python v3.10
 if sys.version_info < (3, 10):
@@ -19,8 +19,8 @@ T = TypeVar("T")
 YieldFixture = Generator[T, None, None]
 
 TransactionT = Union[
-    algosdk_transaction.Transaction,
-    algosdk_transaction.LogicSigTransaction,
+    algosdk.transaction.Transaction,
+    algosdk.transaction.LogicSigTransaction,
     "_MultisigTxn",
     "_GroupTxn",
 ]
