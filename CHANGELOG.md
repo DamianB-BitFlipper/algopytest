@@ -33,6 +33,7 @@ straightforward as possible.
 - Sped up the ``AlgoPytest`` test suite runtime by caching the ``_initial_funds_account``.
 - Altered arguments of ``smart_signature_transaction`` to accept transaction tuple
 - Replaced simply ``print`` with a proper ``logging.logger`` in the ``transaction_boilerplate`` decorator.
+- Migrated code to support py-algorand-sdk v2.0.0
 
 ## [1.0.0] - 2022-02-09
 

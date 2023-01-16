@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import algosdk
-from algosdk.future import transaction as algosdk_transaction
+import algosdk.transaction
 
 
 @dataclass
@@ -64,12 +64,12 @@ class MultisigAccount(AlgoUser):
         super().__init__(address=self.attributes.address(), name=name)
 
     @property
-    def attributes(self) -> algosdk_transaction.Multisig:
+    def attributes(self) -> algosdk.transaction.Multisig:
         # Return a fresh `Multisig` object every time `self.attributes` is called.
         # This is because if the attributes are used to sign a `MultisigTransaction`,
         # they may no longer be reused to sign a different `MultisigTransaction`
         owners_pub_keys = [owner.address for owner in self._owner_accounts]
-        return algosdk_transaction.Multisig(
+        return algosdk.transaction.Multisig(
             self._version, self._threshold, owners_pub_keys
         )
 
