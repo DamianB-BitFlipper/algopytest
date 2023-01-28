@@ -39,7 +39,7 @@ def _indexer_client() -> indexer.IndexerClient:
 
 ## KMD
 def _get_kmd_account_private_key(address: str) -> str:
-    """Return passphrase for provided ``address``."""
+    """Return the private key for the provided ``address``."""
     # Inspired by https://github.com/algorand-devrel/demo-avm1.1/blob/master/demos/utils/sandbox.py
     kmd = KMDClient(ConfigParams.kmd_token, ConfigParams.kmd_address)
     wallets = kmd.list_wallets()
@@ -77,7 +77,15 @@ def process_transactions(transactions: list[TransactionT]) -> int:
 def suggested_params(**kwargs: Any) -> algosdk.transaction.SuggestedParams:
     """Return the suggested params from the algod client.
 
-    Set the provided attributes in ``kwargs`` in the suggested parameters.
+    Parameters
+    ----------
+    kwargs
+        Parameter/value pairings to override in the transaction suggested parameters.
+
+    Returns
+    -------
+    SuggestedParams
+       The suggested transaction parameters for an Algorand transaction.
     """
     params = _algod_client().suggested_params()
 
@@ -164,7 +172,18 @@ def _initial_funds_account() -> AlgoUser:
 
 @_wait_for_indexer
 def transaction_info(transaction_id: str) -> dict[str, Any]:
-    """Return transaction with provided ``transaction_id``."""
+    """Retrieve information regarding the transaction identified by ``transaction_id``.
+
+    Parameters
+    ----------
+    transaction_id
+        The transaction ID of the transaction to query.
+
+    Returns
+    -------
+    dict[str, Any]
+        The details of the requested transaction.
+    """
     return _indexer_client().transaction(transaction_id)
 
 
@@ -177,9 +196,9 @@ def application_global_state(
     Parameters
     ----------
     app_id
-       The ID of the application to query for its global state.
+        The ID of the application to query for its global state.
     address_fields
-       The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
+        The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
 
     Returns
     -------
@@ -200,11 +219,11 @@ def application_local_state(
     Parameters
     ----------
     app_id
-       The ID of the application to query for the local state.
+        The ID of the application to query for the local state.
     account
-       The user whose local state to read.
+        The user whose local state to read.
     address_fields
-       The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
+        The keys where the value is expected to be an Algorand address. Address values need to be encoded to get them in human-readable format.
 
     Returns
     -------
@@ -225,14 +244,38 @@ def application_local_state(
 
 @_wait_for_indexer
 def account_balance(account: AlgoUser) -> int:
-    """Return the balance amount for the provided ``account``."""
+    """Return the balance amount for the provided ``account``.
+
+    Parameters
+    ----------
+    account
+        The Algorand user whose account balance to query.
+
+    Returns
+    -------
+    int
+        The account balance in microAlgos.
+    """
     account_data = _indexer_client().account_info(account.address)["account"]
     return account_data["amount"]
 
 
 @_wait_for_indexer
 def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
-    """Return the asset balance amount for the provided ``account`` and ``asset_id``."""
+    """Return the asset balance amount for the provided ``account`` and ``asset_id``.
+
+    Parameters
+    ----------
+    account
+        The Algorand user whose asset balance to query.
+    asset_id
+        The specific asset ID for which to query.
+
+    Returns
+    -------
+    int | None
+        The account's balance of the asset request. Returns ``None`` if the account is not opted-in to the asset.
+    """
     account_data = _indexer_client().account_info(account.address)["account"]
     assets = account_data.get("assets", [])
 
