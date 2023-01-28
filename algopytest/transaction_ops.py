@@ -472,7 +472,6 @@ def _create_compiled_app(
         clear_compiled,
         global_schema,
         local_schema,
-        params=params,
         app_args=app_args,
         accounts=[account.address for account in accounts],
         foreign_apps=foreign_apps,
