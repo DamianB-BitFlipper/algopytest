@@ -34,6 +34,7 @@ straightforward as possible.
 - Altered arguments of ``smart_signature_transaction`` to accept transaction tuple
 - Replaced simply ``print`` with a proper ``logging.logger`` in the ``transaction_boilerplate`` decorator.
 - Migrated code to support py-algorand-sdk v2.0.0
+- Completed the docstrings for every exported function and class.
 
 ## [1.0.0] - 2022-02-09
 
