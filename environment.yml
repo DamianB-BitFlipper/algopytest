@@ -8,7 +8,7 @@ dependencies:
   - pytest
   - python
   - setuptools
-  - sphinx
+  - sphinx<6
   - m2r2
   - sphinx_rtd_theme
   - twine

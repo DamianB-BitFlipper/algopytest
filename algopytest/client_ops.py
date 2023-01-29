@@ -270,7 +270,7 @@ def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
 
     Returns
     -------
-    int | None
+    Optional[int]
         The account's balance of the asset request. Returns ``None`` if the account is not opted-in to the asset.
     """
     account_data = _indexer_client().account_info(account.address)["account"]
