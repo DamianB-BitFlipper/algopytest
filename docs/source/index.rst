@@ -16,9 +16,3 @@ Welcome to AlgoPytest's documentation!
    demos
 
 .. mdinclude:: ../../README.md
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
