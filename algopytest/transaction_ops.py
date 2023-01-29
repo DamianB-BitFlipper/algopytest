@@ -28,6 +28,24 @@ _with_txn_id: Optional[bool] = None
 
 
 class TxnElemsContext:
+    """Context manager to return unsent transaction objects from AlgoPytest transaction operations.
+
+    Within this context manager, all AlgoPytest transaction operations return an unsent
+    transaction object rather than sending the transaction into the Algorand network.
+
+    Example
+    -------
+    .. code-block:: python
+
+        # Create a group transaction utilizing the `TxnElemsContext` context manager
+        with TxnElemsContext():
+            txn0 = payment_transaction(sender=owner, receiver=user1, amount=10_000_000)
+            txn1 = payment_transaction(sender=owner, receiver=user2, amount=10_000_000)
+
+        # Send the group transaction by supplying the unsent transactions to group
+        group_transaction(txn0, txn1)
+    """
+
     def __enter__(self) -> None:
         global _no_send, _no_log
 
@@ -49,6 +67,12 @@ class TxnElemsContext:
 
 
 class TxnIDContext:
+    """Context manager to return sent transaction ID from AlgoPytest transaction operations.
+
+    Within this context manager, all AlgoPytest transaction operations return the sent
+    transaction's ID along with any usual return result as a tuple.
+    """
+
     def __enter__(self) -> None:
         global _with_txn_id
 
@@ -68,7 +92,7 @@ class TxnIDContext:
 
 
 class DeployedAppID(int):
-    """Subclass the `int` so that it can be used as a context manager or directly."""
+    """Subclass the ``int`` so that it can be used as a context manager or directly."""
 
     owner: AlgoUser
 
@@ -91,7 +115,7 @@ class DeployedAppID(int):
 
 
 class DeployedAssetID(int):
-    """Subclass the `int` so that it can be used as a context manager or directly."""
+    """Subclass the ``int`` so that it can be used as a context manager or directly."""
 
     owner: AlgoUser
 
@@ -209,6 +233,7 @@ def create_app(
     global_ints: int = 0,
     global_bytes: int = 0,
     *,
+    params: Optional[algosdk.transaction.SuggestedParams] = None,
     app_args: Optional[List[Union[str, int]]] = None,
     accounts: Optional[List[AlgoUser]] = None,
     foreign_apps: Optional[List[int]] = None,
@@ -217,7 +242,53 @@ def create_app(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
     extra_pages: int = 0,
-) -> int:
+) -> DeployedAppID:
+    """Deploy a smart contract from the supplied details.
+
+    Parameters
+    ----------
+    owner
+        The user who will be the creator and owner of the smart contract.
+    approval_program
+        The PyTeal expression representing the approval program.
+    clear_program
+        The PyTeal expression representing the clear program.
+    version
+        The version with which to compile the supplied PyTeal programs.
+    local_ints
+        The local integer requirements of the smart contract application.
+    local_bytes
+        The local bytes requirements of the smart contract application.
+    global_ints
+        The global integer requirements of the smart contract application.
+    global_bytes
+        The global bytes requirements of the smart contract application.
+    params
+        Transaction parameters to use when sending the ``ApplicationCreateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
+    extra_pages
+        Provides extra program size.
+
+    Returns
+    -------
+    DeployedAppID
+        A derived integer type holding the deployed application's ID. Can be used as
+        a regular integer, but also within a context manager to facilitate easy clean up.
+    """
     # Compile the smart contract
     approval_compiled = compile_program(approval_program, Mode.Application, version)
     clear_compiled = compile_program(clear_program, Mode.Application, version)
@@ -258,7 +329,47 @@ def create_compiled_app(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
     extra_pages: int = 0,
-) -> int:
+) -> DeployedAppID:
+    """Deploy a smart contract from the supplied details.
+
+    Parameters
+    ----------
+    owner
+        The user who will be the creator and owner of the smart contract.
+    approval_compiled
+        The TEAL compiled binary code of the approval program.
+    clear_compiled
+        The TEAL compiled binary code of the clear program.
+    global_schema
+        The global state schema details.
+    local_schema
+        The local state schema details.
+    params
+        Transaction parameters to use when sending the ``ApplicationCreateTxn`` into the Algorand network.
+    app_args
+        Any additional arguments to the application.
+    accounts
+        Any additional accounts to supply to the application.
+    foreign_apps
+        Any other apps used by the application, identified by app index.
+    foreign_assets
+        List of assets involved in call.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
+    extra_pages
+        Provides extra program size.
+
+    Returns
+    -------
+    DeployedAppID
+        A derived integer type holding the deployed application's ID. Can be used as
+        a regular integer, but also within a context manager to facilitate easy clean up.
+    """
     # Deploy the smart contract
     app_id = _create_compiled_app(
         owner,
@@ -266,6 +377,7 @@ def create_compiled_app(
         clear_compiled,
         global_schema,
         local_schema,
+        params=params,
         app_args=app_args,
         accounts=accounts,
         foreign_apps=foreign_apps,
@@ -822,7 +934,7 @@ def payment_transaction(
     params
         Transaction parameters to use when sending the ``PaymentTxn`` into the Algorand network.
     close_remainder_to
-        An Algorand address to close any remainder to.
+        An Algorand address to close any remainder balance of the sender to.
     note
         A note to attach to the payment transaction.
     lease
@@ -871,6 +983,51 @@ def create_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> int:
+    """Create an Algorand standard asset from the supplied details.
+
+    Parameters
+    ----------
+    sender
+        The user who will be the creator of the asset.
+    manager
+        The user with manager privileges over the asset.
+    reserve
+        The user representing the reserve address of the asset.
+    freeze
+        The user with freeze privileges over the asset.
+    clawback
+        The user with clawback privileges over the asset.
+    asset_name
+        The name of the asset.
+    total
+        The total amount of asset tokens to mint.
+    decimals
+        The degree of divisibility of the asset.
+    unit_name
+        The name of a unit of this asset.
+    default_frozen
+        Whether to freeze the holdings of this asset by default.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    url
+        Specifies a URL where more information on the asset can be retrieved
+    metadata_hash
+        A 32-byte hash of metadata that is relevant to your asset and/or asset holders.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
+
+    Returns
+    -------
+    DeployedAssetID
+        A derived integer type holding the created asset's ID. Can be used as a regular
+        integer, but also within a context manager to facilitate easy clean up.
+    """
+
     # Create the asset
     asset_id = _create_asset(
         sender=sender,
@@ -883,6 +1040,7 @@ def create_asset(
         decimals=decimals,
         unit_name=unit_name,
         default_frozen=default_frozen,
+        params=params,
         url=url,
         metadata_hash=metadata_hash,
         note=note,
@@ -917,13 +1075,48 @@ def _create_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Create an Algorand asset.
+    """Create an Algorand standard asset from the supplied details.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user who will be the creator of the asset.
+    manager
+        The user with manager privileges over the asset.
+    reserve
+        The user representing the reserve address of the asset.
+    freeze
+        The user with freeze privileges over the asset.
+    clawback
+        The user with clawback privileges over the asset.
+    asset_name
+        The name of the asset.
+    total
+        The total amount of asset tokens to mint.
+    decimals
+        The degree of divisibility of the asset.
+    unit_name
+        The name of a unit of this asset.
+    default_frozen
+        Whether to freeze the holdings of this asset by default.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    url
+        Specifies a URL where more information on the asset can be retrieved
+    metadata_hash
+        A 32-byte hash of metadata that is relevant to your asset and/or asset holders.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
-    None
+    int
+        The created asset's ID.
     """
     # Materialize all of the optional arguments
     rekey_to = rekey_to or _NullUser
@@ -961,9 +1154,23 @@ def destroy_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Destroy an Algorand asset.
+    """Destroy an Algorand standard asset.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user who created the asset.
+    asset_id
+        The ID of the asset to destroy.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -999,9 +1206,31 @@ def update_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Update an Algorand asset.
+    """Update an Algorand standard asset.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user who created the asset.
+    asset_id
+        The ID of the asset to destroy.
+    manager
+        The user to take over the manager privileges over the asset.
+    reserve
+        The user to take over the reserve address of the asset.
+    freeze
+        The user to take over the freeze privileges over the asset.
+    clawback
+        The user to take over the clawback privileges over the asset.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -1044,9 +1273,27 @@ def freeze_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Freeze the Algorand assets of a target user.
+    """Freeze/unfreeze an Algorand standard asset of a target user.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user who created the asset.
+    target
+        The user whose asset will be frozen/unfrozen.
+    new_freeze_state
+        Whether the asset of the target user should be frozen or not.
+    asset_id
+        The ID of the asset to freeze/unfreeze.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -1084,9 +1331,31 @@ def transfer_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Transfer Algorand assets to a target recipient.
+    """Transfer Algorand standard asset tokens to a target recipient.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user to send the asset transfer.
+    receiver
+        The user to receive the asset transfer.
+    amount
+        The amount of asset base units to transfer.
+    asset_id
+        The ID of the asset to transfer.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    close_assets_to
+        An Algorand user to close any remainder asset balance of the sender to.
+    revocation_target
+        Send assets from this address rather than the sender. Can be used only by the clawback user of the asset.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -1124,9 +1393,27 @@ def opt_in_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Opt-in to an Algorand asset.
+    """Opt-in to an Algorand standard asset.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user to opt-in to the asset.
+    asset_id
+        The ID of the asset to opt-in to.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    close_assets_to
+        An Algorand user to close any remainder asset balance of the sender to.
+    revocation_target
+        Send assets from this address rather than the sender. Can be used only by the clawback user of the asset.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -1159,9 +1446,25 @@ def close_out_asset(
     lease: str = "",
     rekey_to: Optional[AlgoUser] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.Transaction]:
-    """Opt-in to an Algorand asset.
+    """Close out an Algorand standard asset.
 
-    TODO: write docs!
+    Parameters
+    ----------
+    sender
+        The user to close-out of the asset.
+    asset_id
+        The ID of the asset to close-out of.
+    receiver
+        The user to receive the entire asset balance of the sender before closing out.
+    params
+        Transaction parameters to use when sending the ``AssetCreateTxn`` into the Algorand network.
+    note
+        A note to attach to the application creation transaction.
+    lease
+        A unique lease where no other transaction from the same sender and same lease
+        can be confirmed during the transactions valid rounds.
+    rekey_to
+        An Algorand address to rekey the sender to.
 
     Returns
     -------
@@ -1186,12 +1489,27 @@ def close_out_asset(
     no_sign=True,
 )
 def smart_signature_transaction(
-    smart_signature: bytes,
+    smart_signature: algosdk.transaction.LogicSigAccount,
     transaction: Tuple[AlgoUser, algosdk.transaction.Transaction],
     *,
     params: Optional[algosdk.transaction.SuggestedParams] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.LogicSigTransaction]:
-    """Write docs here: TODO!"""
+    """Send a transaction signed by a smart signature.
+
+    Parameters
+    ----------
+    smart_signature
+        The smart signature to sign the transaction.
+    transaction
+        The transaction to send singed by the smart signature.
+    params
+        Transaction parameters to use when sending the ``LogicSigTransaction`` into the Algorand network.
+
+    Returns
+    -------
+    None
+
+    """
     logic_txn = algosdk.transaction.LogicSigTransaction(transaction[1], smart_signature)
     return _NullUser, logic_txn
 
@@ -1229,7 +1547,17 @@ def multisig_transaction(
     transaction: Tuple[AlgoUser, algosdk.transaction.Transaction],
     signing_accounts: List[AlgoUser],
 ) -> Tuple[AlgoUser, _MultisigTxn]:
-    """Write docs here: TODO!"""
+    """Send a multi-signature transaction operating on a multi-signature account.
+
+    Parameters
+    ----------
+    multisig_account
+        The multi-signature account which the multi-signature transaction will affect.
+    transaction
+        The transaction which will affect the multi-signature account.
+    signing_accounts
+        The multiple accounts to sign the transaction as a multi-signature transaction.
+    """
     # The signers are specified in the `signing_accounts` list and are
     # handled specially by the `_MultisigTxn` class. So return the `_NullUser`
     # as the signer as a placeholder
@@ -1285,7 +1613,14 @@ class _GroupTxn:
 def group_transaction(
     *transactions: Tuple[AlgoUser, algosdk.transaction.Transaction],
 ) -> Tuple[AlgoUser, _GroupTxn]:
-    """Write docs here: TODO!"""
+    """Send all of the supplied unsent ``transactions`` as a group transaction.
+
+    Parameters
+    ----------
+    *transactions
+        Unsent transaction objects to send as a group. It is recommended to use the
+        ``TxnElemsContext`` context manager to create these unsent transaction objects.
+    """
     # The signers are already included as the first elements
     # of the tuples in `transactions`, so return the `_NullUser`
     # as the signer of this group transaction

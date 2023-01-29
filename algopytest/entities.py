@@ -7,7 +7,17 @@ import algosdk.transaction
 
 @dataclass
 class AlgoUser:
-    """A simple Algorand user storing an address and private key."""
+    """A simple Algorand user storing an address and private key.
+
+    Parameters
+    ----------
+    address
+        The base32 Algorand address of the user.
+    private_key
+        The private key of the user.
+    name
+        A name assigned to the user for better pretty-printing.
+    """
 
     address: str
     private_key: Optional[str] = None
@@ -25,7 +35,15 @@ _NullUser = AlgoUser(address="")
 
 
 class SmartContractAccount(AlgoUser):
-    """An Algorand user subclass representing a smart contract's account address."""
+    """An Algorand user subclass representing a smart contract's account address.
+
+    Parameters
+    ----------
+    app_id
+        The ID of the application for this account address.
+    name
+        A name assigned to the application account for better pretty-printing.
+    """
 
     def __init__(self, app_id: int, name: Optional[str] = None):
         self._app_id = app_id
@@ -46,7 +64,19 @@ class SmartContractAccount(AlgoUser):
 
 
 class MultisigAccount(AlgoUser):
-    """An Algorand user subclass representing a multi-signature account."""
+    """An Algorand user subclass representing a multi-signature account.
+
+    Parameters
+    ----------
+    version
+        The version of the multi-signature account.
+    threshold
+        The minimum number of owner signers required to operate the multi-signature account.
+    owner_accounts
+        The owners of the multi-signature account.
+    name
+        A name assigned to the multi-signature account for better pretty-printing.
+    """
 
     def __init__(
         self,
