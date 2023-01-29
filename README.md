@@ -203,7 +203,7 @@ def test_update_from_owner(owner, smart_contract_id):
 ### Pytest Documentation References
 - Pytest directory structure: [documentation](https://docs.pytest.org/en/6.2.x/goodpractices.html#choosing-a-test-layout-import-rules)
 - Pytest fixtures: [documentation](https://docs.pytest.org/en/6.2.x/fixture.html)
-- Pytest `conftest.py`: [documentation](https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files)
+- Pytest `conftest.py` : [documentation](https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files)
 
 ## Dev Installation
 ```bash
