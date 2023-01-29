@@ -19,30 +19,38 @@ Module containing the transaction operations used to interact with Smart Contrac
 
 .. automodule:: algopytest.transaction_ops
 
-Transaction Operations Context Managers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Operation Context Managers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: algopytest.transaction_ops
    :members: TxnElemsContext, TxnIDContext
    :undoc-members:
    :show-inheritance:
 
-Transaction Operations
-~~~~~~~~~~~~~~~~~~~~~~
+Smart Contract Operations
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: algopytest.transaction_ops
-   :members: call_app, clear_app, close_out_app, close_out_asset, create_app,
-             create_compiled_app, create_asset, delete_app, destroy_asset,
-             freeze_asset, opt_in_app, opt_in_asset, payment_transaction,
-             transfer_asset, update_app, update_asset
+   :members: create_app, create_compiled_app, opt_in_app,
+             call_app, clear_app, close_out_app, 
+             delete_app, update_app
    :undoc-members:
    :show-inheritance:
       
-Advanced Transaction Operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Algorand ASA Operations
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: algopytest.transaction_ops
-   :members: group_transaction, multisig_transaction, smart_signature_transaction
+   :members: close_out_asset, create_asset, destroy_asset, freeze_asset,
+             opt_in_asset, transfer_asset, update_asset
+   :undoc-members:
+   :show-inheritance:
+      
+Other Transaction Operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: algopytest.transaction_ops
+   :members: payment_transaction, group_transaction, multisig_transaction, smart_signature_transaction
    :undoc-members:
    :show-inheritance:
       
