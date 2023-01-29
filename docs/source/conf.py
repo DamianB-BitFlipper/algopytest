@@ -44,6 +44,8 @@ autodoc_member_order = "bysource"
 autodoc_type_aliases = {
     "PyTEAL": "PyTEAL",
     "YieldFixture": "YieldFixture",
+    "TransactionT": "TransactionT",
+    "SignerTxnPairT": "SignerTxnPairT",
 }
 autodoc_typehints_format = "short"
 
