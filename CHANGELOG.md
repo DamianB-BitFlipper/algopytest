@@ -39,6 +39,7 @@ straightforward as possible.
 - Completed the docstrings for every exported function and class.
 - Introduced the type alias ``SignerTxnPairT`` to make the output of transaction operations less confusing.
 - Divided the API documentation into subsections for easier referencing.
+- Expanded list of demo projects in the ``demos.rst`` documentation page.
 - Replaced ``mdash`` html code in README.md with UTF8 mdash so that sphinx displays it correctly
 
 ## [1.0.0] - 2022-02-09
