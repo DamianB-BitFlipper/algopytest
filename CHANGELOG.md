@@ -42,6 +42,7 @@ straightforward as possible.
 - Expanded list of demo projects in the ``demos.rst`` documentation page.
 - Replaced ``mdash`` html code in README.md with UTF8 mdash so that sphinx displays it correctly
 - Organize subsection in documentation linking to key Pytest topics essential to AlgoPytest.
+- Removed non-working search and index links at the bottom of the sphinx index page.
 
 ## [1.0.0] - 2022-02-09
 
