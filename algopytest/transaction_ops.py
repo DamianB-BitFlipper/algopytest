@@ -19,6 +19,10 @@ from .client_ops import (
 from .entities import AlgoUser, MultisigAccount, _NullUser
 from .type_stubs import P, TransactionT
 
+# A type alias representing the native signer, transaction object exchanged around in AlgoPytest
+SignerTxnPairT = Tuple[AlgoUser, TransactionT]
+
+
 # Global variable switches controlled by context managers for the `transaction_boilerplate` decorator
 _no_log: Optional[bool] = None
 _no_params: Optional[bool] = None
@@ -31,7 +35,9 @@ class TxnElemsContext:
     """Context manager to return unsent transaction objects from AlgoPytest transaction operations.
 
     Within this context manager, all AlgoPytest transaction operations return an unsent
-    transaction object rather than sending the transaction into the Algorand network.
+    signer-transaction pairing rather than sending the transaction into the Algorand network.
+    This pairing can be directly re-input to other AlgoPytest transaction operations that
+    take signer-transaction pairings as inputs, such as ``group_transaction``.
 
     Example
     -------
@@ -145,10 +151,10 @@ def transaction_boilerplate(
     with_txn_id: bool = False,
     format_finish: Optional[Callable] = None,
     return_fn: Optional[Callable] = None,
-) -> Callable[[Callable[P, Tuple[AlgoUser, TransactionT]]], Callable[P, Any]]:
+) -> Callable[[Callable[P, SignerTxnPairT]], Callable[P, Any]]:
     """A decorator to handle all of the transaction boilerplate."""
 
-    def decorator(func: Callable[P, Tuple[AlgoUser, TransactionT]]) -> Callable[P, Any]:
+    def decorator(func: Callable[P, SignerTxnPairT]) -> Callable[P, Any]:
         """The actual decorator since it takes the arguments above."""
 
         @wraps(func)
@@ -1490,7 +1496,7 @@ def close_out_asset(
 )
 def smart_signature_transaction(
     smart_signature: algosdk.transaction.LogicSigAccount,
-    transaction: Tuple[AlgoUser, algosdk.transaction.Transaction],
+    transaction: SignerTxnPairT,
     *,
     params: Optional[algosdk.transaction.SuggestedParams] = None,
 ) -> Tuple[AlgoUser, algosdk.transaction.LogicSigTransaction]:
@@ -1517,7 +1523,7 @@ def smart_signature_transaction(
 class _MultisigTxn:
     def __init__(
         self,
-        transaction: Tuple[AlgoUser, algosdk.transaction.Transaction],
+        transaction: SignerTxnPairT,
         signing_accounts: List[AlgoUser],
         multisig_account: MultisigAccount,
     ):
@@ -1544,7 +1550,7 @@ class _MultisigTxn:
 )
 def multisig_transaction(
     multisig_account: MultisigAccount,
-    transaction: Tuple[AlgoUser, algosdk.transaction.Transaction],
+    transaction: SignerTxnPairT,
     signing_accounts: List[AlgoUser],
 ) -> Tuple[AlgoUser, _MultisigTxn]:
     """Send a multi-signature transaction operating on a multi-signature account.
@@ -1611,15 +1617,15 @@ class _GroupTxn:
     no_params=True,
 )
 def group_transaction(
-    *transactions: Tuple[AlgoUser, algosdk.transaction.Transaction],
+    *transactions: SignerTxnPairT,
 ) -> Tuple[AlgoUser, _GroupTxn]:
     """Send all of the supplied unsent ``transactions`` as a group transaction.
 
     Parameters
     ----------
     *transactions
-        Unsent transaction objects to send as a group. It is recommended to use the
-        ``TxnElemsContext`` context manager to create these unsent transaction objects.
+        Unsent signer-transaction pairings to send as a group. It is recommended to use the
+        ``TxnElemsContext`` context manager to create these unsent signer-transaction pairings.
     """
     # The signers are already included as the first elements
     # of the tuples in `transactions`, so return the `_NullUser`
