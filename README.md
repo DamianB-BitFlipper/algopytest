@@ -130,7 +130,7 @@ def test_issue_diploma(owner_in, user1_in, smart_contract_id):
 Original source may be found [here](https://github.com/DamianB-BitFlipper/algo-diploma/blob/master/tests/test_interaction.py).
 
 ## Detailed Usage
-Refer to the [Documentation References](#documentation-references) below for more specific explanations of key topics.
+Refer to the [Pytest Documentation References](#pytest-documentation-references) below for more specific explanations of key Pytest topics. These topics are essential to understand in order to use *AlgoPytest* effectively.
 
 ### AlgoPytest Setup
 Firstly, you must follow the Pytest directory structure. Essentially, all tests will be found within a `tests` directory in the root of your project.
@@ -200,11 +200,10 @@ def test_update_from_owner(owner, smart_contract_id):
     update_app(owner, smart_contract_id)
 ```
 
-### Documentation References
+### Pytest Documentation References
 - Pytest directory structure: [documentation](https://docs.pytest.org/en/6.2.x/goodpractices.html#choosing-a-test-layout-import-rules)
-- Pytest `pytest_configure`: [documentation](https://docs.pytest.org/en/6.2.x/reference.html#pytest.hookspec.pytest_configure)
-- Pytest `conftest.py`: [documentation](https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files)
-- *AlgoPytest* `initialize`: [documentation](https://algopytest.readthedocs.io/en/latest/algopytest.html#algopytest.initialize)
+- Pytest fixtures: [documentation](https://docs.pytest.org/en/6.2.x/fixture.html)
+- Pytest `conftest.py` : [documentation](https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fixtures-across-multiple-files)
 
 ## Dev Installation
 ```bash
