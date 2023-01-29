@@ -40,6 +40,7 @@ straightforward as possible.
 - Introduced the type alias ``SignerTxnPairT`` to make the output of transaction operations less confusing.
 - Divided the API documentation into subsections for easier referencing.
 - Replaced ``mdash`` html code in README.md with UTF8 mdash so that sphinx displays it correctly
+- Removed non-working search and index links at the bottom of the sphinx index page.
 
 ## [1.0.0] - 2022-02-09
 
