@@ -130,7 +130,7 @@ def test_issue_diploma(owner_in, user1_in, smart_contract_id):
 Original source may be found [here](https://github.com/DamianB-BitFlipper/algo-diploma/blob/master/tests/test_interaction.py).
 
 ## Detailed Usage
-Refer to the [Pytest Documentation References](#pytest-documentation-references) below for more specific explanations of key Pytest topics.
+Refer to the [Pytest Documentation References](#pytest-documentation-references) below for more specific explanations of key Pytest topics. These topics are essential to understand in order to use *AlgoPytest* effectively.
 
 ### AlgoPytest Setup
 Firstly, you must follow the Pytest directory structure. Essentially, all tests will be found within a `tests` directory in the root of your project.
