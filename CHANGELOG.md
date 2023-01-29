@@ -35,6 +35,7 @@ straightforward as possible.
 - Replaced simply ``print`` with a proper ``logging.logger`` in the ``transaction_boilerplate`` decorator.
 - Migrated code to support py-algorand-sdk v2.0.0
 - Completed the docstrings for every exported function and class.
+- Introduced the type alias ``SignerTxnPairT`` to make the output of transaction operations less confusing.
 
 ## [1.0.0] - 2022-02-09
 
