@@ -34,8 +34,11 @@ straightforward as possible.
 - Altered arguments of ``smart_signature_transaction`` to accept transaction tuple
 - Replaced simply ``print`` with a proper ``logging.logger`` in the ``transaction_boilerplate`` decorator.
 - Migrated code to support py-algorand-sdk v2.0.0
+
+### Documentation Changes
 - Completed the docstrings for every exported function and class.
 - Introduced the type alias ``SignerTxnPairT`` to make the output of transaction operations less confusing.
+- Divided the API documentation into subsections for easier referencing.
 
 ## [1.0.0] - 2022-02-09
 

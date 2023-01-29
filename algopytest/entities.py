@@ -20,8 +20,13 @@ class AlgoUser:
     """
 
     address: str
+    """Stored user address from the constructor."""
+
     private_key: Optional[str] = None
+    """Stored user private key from the constructor."""
+
     name: Optional[str] = None
+    """Stored user name from the constructor."""
 
     def __str__(self) -> str:
         str_identifier = self.name if self.name else self.address
@@ -95,6 +100,7 @@ class MultisigAccount(AlgoUser):
 
     @property
     def attributes(self) -> algosdk.transaction.Multisig:
+        """The multi-signature attributes enforced on this multi-signature account."""
         # Return a fresh `Multisig` object every time `self.attributes` is called.
         # This is because if the attributes are used to sign a `MultisigTransaction`,
         # they may no longer be reused to sign a different `MultisigTransaction`

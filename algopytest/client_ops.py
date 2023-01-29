@@ -1,13 +1,10 @@
-"""
-Module containing helper functions for accessing Algorand blockchain.
-"""
 # So that sphinx picks up on the type aliases
 from __future__ import annotations
 
 import base64
 import time
 from functools import lru_cache, wraps
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 import algosdk.transaction
 import pyteal
@@ -273,7 +270,7 @@ def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
 
     Returns
     -------
-    int | None
+    Optional[int]
         The account's balance of the asset request. Returns ``None`` if the account is not opted-in to the asset.
     """
     account_data = _indexer_client().account_info(account.address)["account"]
@@ -289,8 +286,19 @@ def asset_balance(account: AlgoUser, asset_id: int) -> Optional[int]:
 
 
 @_wait_for_indexer
-def asset_info(asset_id: int) -> Dict[str, Any]:
-    """Return the asset information for the provided ``asset_id``."""
+def asset_info(asset_id: int) -> dict[str, Any]:
+    """Return the asset information for the provided ``asset_id``.
+
+    Parameters
+    ----------
+    asset_id
+        The specific asset ID for which to query.
+
+    Returns
+    -------
+    dict[str, Any]
+        The details of the requested asset.
+    """
     return _indexer_client().asset_info(asset_id)
 
 
