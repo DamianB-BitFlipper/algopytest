@@ -65,6 +65,7 @@ autosummary
 bysource
 docstring
 google
+groupwise
 typehints
 viewcode
 
