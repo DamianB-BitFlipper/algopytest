@@ -30,10 +30,8 @@ repos:
     rev: v4.3.0  # Use the sha / tag you want to point at
     hooks:
     - id: debug-statements
--   repo: local
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.13.10
     hooks:
-    - id: spellcheck
-      name: spellcheck
-      entry: ./.spellcheck.sh
-      language: system
-      types_or: [python, markdown]
+    - id: typos
+      args: []
