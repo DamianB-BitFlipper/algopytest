@@ -1,7 +1,7 @@
 Configuration Options
 =====================
 
-Configuring `AlgoPytest` is controlled by environemnt variables. These environment variables must be set before executing `pytest` for them to take any effect. If an environment variable is omitted, `AlgoPytest` takes on the default value, if there is one.
+Configuring `AlgoPytest` is controlled by environment variables. These environment variables must be set before executing `pytest` for them to take any effect. If an environment variable is omitted, `AlgoPytest` takes on the default value, if there is one.
 
 * ``ALGOD_ADDRESS``: The address where ``algod`` is listening on. (Default: ``"http://localhost:4001"``)
 * ``ALGOD_TOKEN``: The secret token used to connect to ``algod``. (Default: ``"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"``)
