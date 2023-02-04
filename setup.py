@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 # Important: Update this when making new releases!
 # Be sure to update `version` in '__init__.py' as well
-version = "1.0.0"
+version = "2.0.0"
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -22,8 +22,9 @@ setup(
     download_url=f"https://github.com/DamianB-BitFlipper/algopytest/archive/refs/tags/v{version}.tar.gz",
     install_requires=[
         "pytest",
-        "py-algorand-sdk",
+        "py-algorand-sdk>=2.0.0",
         "pyteal",
+        "typing_extensions",
     ],
     # This makes this plugin available to pytest
     entry_points={"pytest11": ["name_of_plugin = algopytest.fixtures"]},
@@ -34,8 +35,10 @@ setup(
         "Topic :: Software Development :: Testing :: Unit",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 )

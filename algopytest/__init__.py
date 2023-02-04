@@ -21,7 +21,7 @@
 
 # Important: Update this when making new releases!
 # Be sure to update `version` in 'setup.py' as well
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "Damian Barabonkov"
 
 from .client_ops import (
