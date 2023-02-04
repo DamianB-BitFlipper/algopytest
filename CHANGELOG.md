@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased] - yyyy-mm-dd
+## [2.0.0] - 2023-02-04
 
 Here we write upgrading notes for brands. It's a team effort to make them as
 straightforward as possible.
